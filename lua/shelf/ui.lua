@@ -5,6 +5,28 @@ function ui.open()
 
   local bufnr = vim.api.nvim_create_buf(false, true)
 
+  -- open window
+  local winheight = vim.api.nvim_win_get_height(0)
+  local winwidth = vim.opt.columns._value
+
+  local _height = math.floor(winheight * .8)
+  _height = #bufferlist.list > _height and _height or #bufferlist.list
+  local _width = 64
+  _width = _width > winwidth and winwidth or _width
+
+  local win_config = {
+    relative = 'win',
+    title = 'bufferlist',
+    title_pos = 'center',
+    border = 'rounded',
+    row = math.floor((winheight - _height) / 2),
+    col = math.floor((winwidth - _width) / 2),
+    width = _width,
+    height = _height,
+    hide = true,
+  }
+  local win = vim.api.nvim_open_win(bufnr, true, win_config)
+
   -- set up bufferlist
 
   local lines = {}
@@ -111,32 +133,13 @@ function ui.open()
   vim.keymap.set('n', bufferlist.config.mappings.move_up, mappings.move_up, opts)
   vim.keymap.set('n', bufferlist.config.mappings.new, mappings.cut, opts)
 
-  -- open window
-  local winheight = vim.api.nvim_win_get_height(0)
-  local winwidth = vim.opt.columns._value
-
-  local _height = math.floor(winheight * .8)
-  _height = #bufferlist.list > _height and _height or #bufferlist.list
-  local _width = 64
-  _width = _width > winwidth and winwidth or _width
-
-  local win_config = {
-    relative = 'win',
-    title = 'bufferlist',
-    title_pos = 'center',
-    border = 'rounded',
-    row = math.floor((winheight - _height) / 2),
-    col = math.floor((winwidth - _width) / 2),
-    width = _width,
-    height = _height,
-  }
-
   reset_lines()
   update_lines()
 
   vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
 
-  local win = vim.api.nvim_open_win(bufnr, true, win_config)
+  win_config.hide = false
+  vim.api.nvim_win_set_config(win, win_config)
 end
 
 return ui
