@@ -28,7 +28,8 @@ function ui.open()
 
   local function draw(index)
     local v = bufferlist.list[index]
-    local line = string.format('%d %s', v[1], v[2])
+    local name = v[2]
+    local line = string.gsub(name, string.format('^%s', vim.fn.getcwd() .. '/'), '')
 
     return line
   end
