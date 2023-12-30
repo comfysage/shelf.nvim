@@ -9,6 +9,8 @@ local default_config = {
     move_down = 'J',
     move_up = 'K',
     new = 'o',
+    go_down = 'j',
+    go_up = 'k',
   },
 }
 

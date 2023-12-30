@@ -128,6 +128,11 @@ function ui.open()
 
   local opts = { buffer = bufnr, silent = true, noremap = true }
 
+  -- reset movement keys
+  for _, k in ipairs({'h','j','k','l', '<left>', '<down>', '<up>', 'right'}) do
+    vim.keymap.set('n', k, '', { buffer = bufnr })
+  end
+
   vim.keymap.set('n', 'q', mappings.close, opts)
   vim.keymap.set('n', bufferlist.config.mappings.close, mappings.close, opts)
   vim.keymap.set('n', bufferlist.config.mappings.quit, vim.cmd.quit, opts)
@@ -140,6 +145,8 @@ function ui.open()
   vim.keymap.set('n', bufferlist.config.mappings.move_down, mappings.move_down, opts)
   vim.keymap.set('n', bufferlist.config.mappings.move_up, mappings.move_up, opts)
   vim.keymap.set('n', bufferlist.config.mappings.new, mappings.cut, opts)
+  vim.keymap.set('n', bufferlist.config.mappings.go_down, mappings.go_down, opts)
+  vim.keymap.set('n', bufferlist.config.mappings.go_up, mappings.go_up, opts)
 
   reset_lines()
   update_lines()
