@@ -3,6 +3,7 @@ local default_config = {
   mappings = {
     close = 'q',
     quit = '<esc>', -- close without applying changes
+    open = '<cr>',
     cut = 'dd',
     paste = 'p',
     prepend = 'P',

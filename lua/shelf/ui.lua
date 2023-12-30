@@ -126,6 +126,15 @@ function ui.open()
     mappings.go_up()
   end
 
+  mappings.open = function ()
+    local index = get_current_index()
+    if index == 0 then return end
+
+    vim.cmd.quit()
+
+    bufferlist:open(index)
+  end
+
   local opts = { buffer = bufnr, silent = true, noremap = true }
 
   -- reset movement keys
@@ -136,6 +145,7 @@ function ui.open()
   vim.keymap.set('n', 'q', mappings.close, opts)
   vim.keymap.set('n', bufferlist.config.mappings.close, mappings.close, opts)
   vim.keymap.set('n', bufferlist.config.mappings.quit, vim.cmd.quit, opts)
+  vim.keymap.set('n', bufferlist.config.mappings.open, mappings.open, opts)
   vim.keymap.set('n', bufferlist.config.mappings.cut, mappings.cut, opts)
   vim.keymap.set('n', bufferlist.config.mappings.paste, mappings.paste, opts)
   vim.keymap.set('n', bufferlist.config.mappings.prepend, function()
