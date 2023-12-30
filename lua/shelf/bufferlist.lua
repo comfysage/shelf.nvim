@@ -13,7 +13,7 @@ Bufferlist.__index = Bufferlist
 
 ---@return Bufferlist__list
 local function create_list()
-  local old_list = _G.bufferlist.list
+  local old_list = _G.bufferlist and _G.bufferlist.list or {}
   local bufnr_list = vim.api.nvim_list_bufs()
   local list = {}
   local _added = {}
