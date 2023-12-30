@@ -9,20 +9,15 @@ function ui.open()
   local winheight = vim.api.nvim_win_get_height(0)
   local winwidth = vim.opt.columns._value
 
-  local _height = math.floor(winheight * .8)
-  _height = #bufferlist.list > _height and _height or #bufferlist.list
-  local _width = 64
-  _width = _width > winwidth and winwidth or _width
-
   local win_config = {
     relative = 'editor',
     title = 'bufferlist',
     title_pos = 'center',
     border = 'rounded',
-    row = math.floor((winheight - _height) / 2),
-    col = math.floor((winwidth - _width) / 2),
-    width = _width,
-    height = _height,
+    row = 1,
+    col = 1,
+    width = 1,
+    height = 1,
     hide = true,
   }
   local win = vim.api.nvim_open_win(bufnr, true, win_config)
@@ -45,10 +40,25 @@ function ui.open()
     end
   end
 
+  local function update_win()
+    local _height = math.floor(winheight * .8)
+    _height = #lines > _height and _height or #lines
+    local _width = 64
+    _width = _width > winwidth and winwidth or _width
+
+    win_config.row = math.floor((winheight - _height) / 2)
+    win_config.col = math.floor((winwidth - _width) / 2)
+    win_config.width = _width
+    win_config.height = _height
+
+    vim.api.nvim_win_set_config(win, win_config)
+  end
+
   local function update_lines()
     vim.api.nvim_set_option_value('modifiable', true, { buf = bufnr })
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
+    update_win()
   end
 
   ---@return integer
@@ -164,7 +174,7 @@ function ui.open()
   vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
 
   win_config.hide = false
-  vim.api.nvim_win_set_config(win, win_config)
+  update_win()
 end
 
 return ui
