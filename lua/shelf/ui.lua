@@ -113,7 +113,7 @@ function ui.open()
   local cursor_go = function(rel)
     local pos = vim.api.nvim_win_get_cursor(win)
     pos[1] = pos[1] + rel
-    if pos[1] < 1 or pos[1] > win_config.height then return end
+    if pos[1] < 1 or pos[1] > #lines then return end
     vim.api.nvim_win_set_cursor(win, pos)
   end
   mappings.go_down = function ()
