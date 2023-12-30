@@ -96,6 +96,15 @@ function Bufferlist:move(old, new)
   table.insert(self.list, new, value)
 end
 
+---@class Bufferlist
+---@field open fun(self: Bufferlist, index: integer)
+function Bufferlist:open(index)
+  local item = self.list[index]
+  if not item then return end
+  local nr = item[1]
+  vim.api.nvim_set_current_buf(nr)
+end
+
 _G.bufferlist = Bufferlist:new()
 
 return _G.bufferlist
