@@ -173,6 +173,7 @@ function ui.open()
   update_lines()
 
   vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
+  vim.api.nvim_set_option_value('signcolumn', 'no', { win = win })
 
   win_config.hide = false
   update_win()
