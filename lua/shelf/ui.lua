@@ -53,13 +53,8 @@ function ui.open()
 
   ---@return integer
   local function get_current_index()
-    local line = vim.api.nvim_get_current_line()
-    local _line = vim.split(line, ' ')
-    if #_line == 0 then return 0 end
-    local _nr = _line[1]
-    local nr = tonumber(_nr)
-    local index = bufferlist:get_index { buf = nr }
-    return index
+    local pos = vim.api.nvim_win_get_cursor(win)
+    return pos[1]
   end
 
   local bufferlist__cut = 0
