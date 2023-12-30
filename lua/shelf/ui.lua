@@ -15,7 +15,7 @@ function ui.open()
   _width = _width > winwidth and winwidth or _width
 
   local win_config = {
-    relative = 'win',
+    relative = 'editor',
     title = 'bufferlist',
     title_pos = 'center',
     border = 'rounded',
