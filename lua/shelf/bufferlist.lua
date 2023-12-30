@@ -88,6 +88,31 @@ function Bufferlist:delete(index)
 end
 
 ---@class Bufferlist
+---@field add fun(self: Bufferlist, index: integer, name: string)
+function Bufferlist:add(index, name)
+  if not index and not name then return end
+
+  local nr = vim.api.nvim_create_buf(true, false)
+  vim.api.nvim_create_autocmd('BufFilePost', {
+    once = true,
+    buffer = nr,
+    desc = 'read file on enter',
+    command = 'e',
+  })
+  vim.api.nvim_buf_set_name(nr, name)
+
+  table.insert(self.list, index, { nr, name })
+end
+
+---@class Bufferlist
+---@field append fun(self: Bufferlist, name: string)
+function Bufferlist:append(name)
+  if not name then return end
+
+  self:add(#self.list+1, name)
+end
+
+---@class Bufferlist
 ---@field move fun(self: Bufferlist, old: integer, new: integer)
 function Bufferlist:move(old, new)
   vim.notify(string.format('move [%d] to [%d]', old, new), vim.log.levels.DEBUG)
