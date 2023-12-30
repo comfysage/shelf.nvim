@@ -100,17 +100,30 @@ function ui.open()
     vim.cmd.quit()
   end
 
+  local cursor_go = function(rel)
+    local pos = vim.api.nvim_win_get_cursor(win)
+    pos[1] = pos[1] + rel
+    if pos[1] < 1 or pos[1] > win_config.height then return end
+    vim.api.nvim_win_set_cursor(win, pos)
+  end
+  mappings.go_down = function ()
+    cursor_go(1)
+  end
+  mappings.go_up = function ()
+    cursor_go(-1)
+  end
+
   mappings.move_down = function ()
     mappings.cut()
     paste(get_current_index()+1)
 
-    vim.cmd [[ norm! j ]]
+    mappings.go_down()
   end
   mappings.move_up = function ()
     mappings.cut()
     paste(get_current_index()-2)
 
-    vim.cmd [[ norm! k ]]
+    mappings.go_up()
   end
 
   local opts = { buffer = bufnr, silent = true, noremap = true }
