@@ -145,6 +145,17 @@ function ui.open()
 
     bufferlist:open(index)
   end
+  mappings.create = function ()
+    vim.ui.input({ prompt = 'file:' }, function(input)
+      if not input or string.len(input) == 0 then return end
+      if string.sub(input, 1, 1) ~= '/' then
+        input = string.format('%s/%s', vim.fn.getcwd(), input)
+      end
+      bufferlist:append(input)
+      reset_lines()
+      update_lines()
+    end)
+  end
 
   local opts = { buffer = bufnr, silent = true, noremap = true }
 
@@ -165,7 +176,7 @@ function ui.open()
   end, opts)
   vim.keymap.set('n', bufferlist.config.mappings.move_down, mappings.move_down, opts)
   vim.keymap.set('n', bufferlist.config.mappings.move_up, mappings.move_up, opts)
-  vim.keymap.set('n', bufferlist.config.mappings.new, mappings.cut, opts)
+  vim.keymap.set('n', bufferlist.config.mappings.create, mappings.create, opts)
   vim.keymap.set('n', bufferlist.config.mappings.go_down, mappings.go_down, opts)
   vim.keymap.set('n', bufferlist.config.mappings.go_up, mappings.go_up, opts)
 

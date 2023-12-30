@@ -9,7 +9,7 @@ local default_config = {
     prepend = 'P',
     move_down = 'J',
     move_up = 'K',
-    new = 'o',
+    create = 'a',
     go_down = 'j',
     go_up = 'k',
   },
