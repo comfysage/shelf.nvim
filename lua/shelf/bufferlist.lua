@@ -109,7 +109,7 @@ end
 function Bufferlist:append(name)
   if not name then return end
 
-  self:add(#self.list+1, name)
+  self:add(#self.list + 1, name)
 end
 
 ---@class Bufferlist
