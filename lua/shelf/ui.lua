@@ -123,27 +123,27 @@ function ui.open()
     if pos[1] < 1 or pos[1] > #lines then return end
     vim.api.nvim_win_set_cursor(win, pos)
   end
-  mappings.go_down = function ()
+  mappings.go_down = function()
     cursor_go(1)
   end
-  mappings.go_up = function ()
+  mappings.go_up = function()
     cursor_go(-1)
   end
 
-  mappings.move_down = function ()
+  mappings.move_down = function()
     mappings.cut()
-    paste(get_current_index()+1)
+    paste(get_current_index() + 1)
 
     mappings.go_down()
   end
-  mappings.move_up = function ()
+  mappings.move_up = function()
     mappings.cut()
-    paste(get_current_index()-2)
+    paste(get_current_index() - 2)
 
     mappings.go_up()
   end
 
-  mappings.open = function ()
+  mappings.open = function()
     local index = get_current_index()
     if index == 0 then return end
 
@@ -151,7 +151,7 @@ function ui.open()
 
     bufferlist:open(index)
   end
-  mappings.create = function ()
+  mappings.create = function()
     vim.ui.input({ prompt = 'file:' }, function(input)
       if not input or string.len(input) == 0 then return end
       if string.sub(input, 1, 1) ~= '/' then
@@ -166,7 +166,7 @@ function ui.open()
   local opts = { buffer = bufnr, silent = true, noremap = true }
 
   -- reset movement keys
-  for _, k in ipairs({'h','j','k','l', '<left>', '<down>', '<up>', 'right'}) do
+  for _, k in ipairs({ 'h', 'j', 'k', 'l', '<left>', '<down>', '<up>', 'right' }) do
     vim.keymap.set('n', k, '', { buffer = bufnr })
   end
 
