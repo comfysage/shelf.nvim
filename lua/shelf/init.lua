@@ -1,4 +1,3 @@
-
 local default_config = {
   mappings = {
     close = 'q',
