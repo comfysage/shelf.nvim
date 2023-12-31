@@ -93,6 +93,8 @@ function ui.open()
   -- mappings
   local mappings = {}
   mappings.cut = function()
+    _check_delete()
+
     local index = get_current_index()
     if index == 0 then return end
     bufferlist__cut = index
