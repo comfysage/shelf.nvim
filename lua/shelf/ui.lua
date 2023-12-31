@@ -70,6 +70,13 @@ function ui.open()
 
   local bufferlist__cut = 0
 
+  local function _check_delete()
+    if bufferlist__cut > 0 then
+      vim.notify(string.format('delete cut item [%d]', bufferlist__cut), vim.log.levels.DEBUG)
+      bufferlist:delete(bufferlist__cut)
+    end
+  end
+
   local function paste(index)
     -- account for moving the value to a new position while the old one still exists
     if index > bufferlist__cut then
@@ -101,10 +108,7 @@ function ui.open()
     paste(new_index)
   end
   mappings.close = function()
-    if bufferlist__cut > 0 then
-      vim.notify(string.format('delete cut item [%d]', bufferlist__cut), vim.log.levels.DEBUG)
-      bufferlist:delete(bufferlist__cut)
-    end
+    _check_delete()
 
     _G.bufferlist = bufferlist
 
