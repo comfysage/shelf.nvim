@@ -1,11 +1,7 @@
 local utils = {}
 
-utils.reorder = function(bufnr, nbufnr)
+utils.reorder = function(bufnr, nbufnr) end
 
-end
-
-utils.simplify = function()
-
-end
+utils.simplify = function() end
 
 return utils
