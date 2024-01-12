@@ -7,7 +7,7 @@ function ui.open()
 
   -- open window
   local winheight = vim.api.nvim_win_get_height(0)
-  local winwidth = vim.opt.columns._value
+  local winwidth = vim.o.columns
 
   local win_config = {
     relative = 'editor',
