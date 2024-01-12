@@ -199,7 +199,7 @@ function Model:send(msg)
       return self:_view()
     end,
     winresize = function()
-      self.internal.window.height = api.nvim_win_get_height(1000)
+      self.internal.window.height = require 'shelf.utils'.getheight()
       self.internal.window.width = vim.o.columns
 
       local _height = math.floor(self.internal.window.height * 0.8)
