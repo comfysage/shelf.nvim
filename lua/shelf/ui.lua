@@ -1,199 +1,207 @@
 local ui = {}
 
-function ui.open()
-  local bufferlist = require 'shelf.bufferlist'
+local api = vim.api
 
-  local bufnr = vim.api.nvim_create_buf(false, true)
+local model = require 'shelf.model'({
+  bufferlist = require 'shelf.bufferlist',
+  lines = { 0 },
+}, { title = 'bufferlist' })
 
-  -- open window
-  local winheight = vim.api.nvim_win_get_height(0)
-  local winwidth = vim.o.columns
+function model:init()
+  self.data.bufferlist__cut = 0
 
-  local win_config = {
-    relative = 'editor',
-    title = 'bufferlist',
-    title_pos = 'center',
-    border = 'rounded',
-    row = 1,
-    col = 1,
-    width = 1,
-    height = 1,
-    hide = true,
-  }
-  local win = vim.api.nvim_open_win(bufnr, true, win_config)
+  -- reset movement keys
+  for _, k in ipairs { 'h', 'j', 'k', 'l', '<left>', '<down>', '<up>', 'right' } do
+    vim.keymap.set('n', k, '', { buffer = self.internal.buf })
+  end
 
-  -- set up bufferlist
+  self:add_mapping('n', 'q', 'close')
+  self:add_mapping('n', self.data.bufferlist.config.mappings.close, 'close')
+  self:add_mapping('n', self.data.bufferlist.config.mappings.quit, 'quit')
+  self:add_mapping('n', self.data.bufferlist.config.mappings.open, 'open')
+  self:add_mapping('n', self.data.bufferlist.config.mappings.cut, 'cut')
+  self:add_mapping('n', self.data.bufferlist.config.mappings.paste, 'paste')
+  self:add_mapping('n', self.data.bufferlist.config.mappings.prepend, 'prepend')
+  self:add_mapping(
+    'n',
+    self.data.bufferlist.config.mappings.move_down,
+    'move_down'
+  )
+  self:add_mapping('n', self.data.bufferlist.config.mappings.move_up, 'move_up')
+  self:add_mapping('n', self.data.bufferlist.config.mappings.create, 'create')
+  self:add_mapping('n', self.data.bufferlist.config.mappings.go_down, 'go_down')
+  self:add_mapping('n', self.data.bufferlist.config.mappings.go_up, 'go_up')
 
-  local lines = {}
+  api.nvim_set_option_value('number', true, { win = self.internal.win })
 
+  self:send 'view'
+end
+
+function model:view()
   local function draw(index)
-    local v = bufferlist.list[index]
+    local v = self.data.bufferlist.list[index]
     local name = v[2]
-    local line = string.gsub(name, string.format('^%s', vim.fn.getcwd() .. '/'), '')
+    local line =
+      string.gsub(name, string.format('^%s', vim.fn.getcwd() .. '/'), '')
 
     return line
   end
-
-  local function reset_lines()
-    lines = {}
-    for i, _ in ipairs(bufferlist.list) do
+  local lines = {}
+  for i, _ in ipairs(self.data.bufferlist.list) do
+    if i ~= self.data.bufferlist__cut then
       lines[#lines + 1] = draw(i)
     end
   end
 
-  local function update_win()
-    local _height = math.floor(winheight * .8)
-    _height = #lines > _height and _height or #lines
-    local _width = 64
-    _width = _width > winwidth and winwidth or _width
+  self.data.lines = lines
+  P(self.data.lines)
+  return lines
+end
 
-    win_config.row = math.floor((winheight - _height) / 2)
-    win_config.col = math.floor((winwidth - _width) / 2)
-    win_config.width = _width
-    win_config.height = _height
-
-    vim.api.nvim_win_set_config(win, win_config)
+---@param props core.types.ui.model
+---@return integer
+local function get_current_index(props)
+  local pos = api.nvim_win_get_cursor(props.internal.win)
+  return pos[1]
+end
+---@param props core.types.ui.model
+local function _check_delete(props)
+  if props.data.bufferlist__cut > 0 then
+    vim.notify(
+      string.format('delete cut item [%d]', props.data.bufferlist__cut),
+      vim.log.levels.DEBUG
+    )
+    props.data.bufferlist:delete(props.data.bufferlist__cut)
+  end
+end
+---@param props core.types.ui.model
+---@param index integer
+local function paste(props, index)
+  -- account for moving the value to a new position while the old one still exists
+  if index > props.data.bufferlist__cut then
+    index = index - 1
   end
 
-  local function update_lines()
-    vim.api.nvim_set_option_value('modifiable', true, { buf = bufnr })
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-    vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
-    update_win()
+  props.data.bufferlist:move(props.data.bufferlist__cut, index)
+
+  props.data.bufferlist__cut = 0
+end
+---@param props core.types.ui.model
+---@param rel integer
+local cursor_go = function(props, rel)
+  local pos = api.nvim_win_get_cursor(props.internal.win)
+  pos[1] = pos[1] + rel
+  local lines = props.data.lines
+  if pos[1] < 1 or pos[1] > #lines then
+    return
   end
+  api.nvim_win_set_cursor(props.internal.win, pos)
+end
 
-  ---@return integer
-  local function get_current_index()
-    local pos = vim.api.nvim_win_get_cursor(win)
-    return pos[1]
-  end
+function model:update(msg)
+  local fn = {
+    -- fix winheight; adjust based on # of lines
+    winresize = function()
+      local win_config = self.internal.window.config
+      local winheight = self.internal.window.height
+      local _height = self.internal.window.config.height
+      local lines = self.data.lines
+      _height = #lines > _height and _height or #lines
 
-  local bufferlist__cut = 0
+      win_config.row = math.floor((winheight - _height) / 2)
+      win_config.height = _height
 
-  local function _check_delete()
-    if bufferlist__cut > 0 then
-      vim.notify(string.format('delete cut item [%d]', bufferlist__cut), vim.log.levels.DEBUG)
-      bufferlist:delete(bufferlist__cut)
-    end
-  end
+      self.internal.window.config = win_config
+      api.nvim_win_set_config(self.internal.win, self.internal.window.config)
+    end,
+    cut = function()
+      _check_delete(self)
 
-  local function paste(index)
-    -- account for moving the value to a new position while the old one still exists
-    if index > bufferlist__cut then
-      index = index - 1
-    end
-
-    bufferlist:move(bufferlist__cut, index)
-    reset_lines()
-    update_lines()
-
-    bufferlist__cut = 0
-  end
-
-  -- mappings
-  local mappings = {}
-  mappings.cut = function()
-    _check_delete()
-
-    local index = get_current_index()
-    if index == 0 then return end
-    bufferlist__cut = index
-    table.remove(lines, index)
-    update_lines()
-  end
-  mappings.paste = function()
-    if bufferlist__cut == 0 then
-      return
-    end
-    local new_index = get_current_index() + 1
-
-    paste(new_index)
-  end
-  mappings.close = function()
-    _check_delete()
-
-    _G.bufferlist = bufferlist
-
-    vim.cmd.quit()
-  end
-
-  local cursor_go = function(rel)
-    local pos = vim.api.nvim_win_get_cursor(win)
-    pos[1] = pos[1] + rel
-    if pos[1] < 1 or pos[1] > #lines then return end
-    vim.api.nvim_win_set_cursor(win, pos)
-  end
-  mappings.go_down = function()
-    cursor_go(1)
-  end
-  mappings.go_up = function()
-    cursor_go(-1)
-  end
-
-  mappings.move_down = function()
-    mappings.cut()
-    paste(get_current_index() + 1)
-
-    mappings.go_down()
-  end
-  mappings.move_up = function()
-    mappings.cut()
-    paste(get_current_index() - 2)
-
-    mappings.go_up()
-  end
-
-  mappings.open = function()
-    local index = get_current_index()
-    if index == 0 then return end
-
-    vim.cmd.quit()
-
-    bufferlist:open(index)
-  end
-  mappings.create = function()
-    vim.ui.input({ prompt = 'file:' }, function(input)
-      if not input or string.len(input) == 0 then return end
-      if string.sub(input, 1, 1) ~= '/' then
-        input = string.format('%s/%s', vim.fn.getcwd(), input)
+      local index = get_current_index(self)
+      if index == 0 then
+        return
       end
-      bufferlist:append(input)
-      reset_lines()
-      update_lines()
-    end)
+      self.data.bufferlist__cut = index
+    end,
+    paste = function()
+      if self.data.bufferlist__cut == 0 then
+        return
+      end
+      local new_index = get_current_index(self) + 1
+
+      paste(self, new_index)
+    end,
+    go_down = function()
+      cursor_go(self, 1)
+    end,
+    go_up = function()
+      cursor_go(self, -1)
+    end,
+    move_down = function()
+      local cur = get_current_index(self)
+      self.data.bufferlist:move(
+        cur,
+        cur + 1
+      )
+
+      self:send 'go_down'
+      -- return 'go_down'
+    end,
+    move_up = function()
+      local cur = get_current_index(self)
+      self.data.bufferlist:move(
+        cur,
+        cur - 1
+      )
+
+      self:send 'go_up'
+      -- return 'go_up'
+    end,
+    open = function()
+      local index = get_current_index(self)
+      if index == 0 then
+        return
+      end
+
+      self:send 'close'
+
+      self.data.bufferlist:open(index)
+    end,
+    create = function()
+      vim.ui.input({ prompt = 'file:' }, function(input)
+        if not input or string.len(input) == 0 then
+          return
+        end
+        if string.sub(input, 1, 1) ~= '/' then
+          input = string.format('%s/%s', vim.fn.getcwd(), input)
+        end
+        self.data.bufferlist:append(input)
+      end)
+      self:send 'view'
+      -- return 'view'
+    end,
+    close = function()
+      _check_delete(self)
+
+      _G.bufferlist = self.data.bufferlist
+
+      vim.cmd.quit()
+    end,
+    prepend = function()
+      self:send 'paste'
+      -- self:send 'move_up'
+      return 'move_up'
+    end,
+  }
+
+  if not fn[msg] or type(fn[msg]) ~= 'function' then
+    return
   end
+  return fn[msg]()
+end
 
-  local opts = { buffer = bufnr, silent = true, noremap = true }
-
-  -- reset movement keys
-  for _, k in ipairs({ 'h', 'j', 'k', 'l', '<left>', '<down>', '<up>', 'right' }) do
-    vim.keymap.set('n', k, '', { buffer = bufnr })
-  end
-
-  vim.keymap.set('n', 'q', mappings.close, opts)
-  vim.keymap.set('n', bufferlist.config.mappings.close, mappings.close, opts)
-  vim.keymap.set('n', bufferlist.config.mappings.quit, vim.cmd.quit, opts)
-  vim.keymap.set('n', bufferlist.config.mappings.open, mappings.open, opts)
-  vim.keymap.set('n', bufferlist.config.mappings.cut, mappings.cut, opts)
-  vim.keymap.set('n', bufferlist.config.mappings.paste, mappings.paste, opts)
-  vim.keymap.set('n', bufferlist.config.mappings.prepend, function()
-    mappings.paste()
-    mappings.move_up()
-  end, opts)
-  vim.keymap.set('n', bufferlist.config.mappings.move_down, mappings.move_down, opts)
-  vim.keymap.set('n', bufferlist.config.mappings.move_up, mappings.move_up, opts)
-  vim.keymap.set('n', bufferlist.config.mappings.create, mappings.create, opts)
-  vim.keymap.set('n', bufferlist.config.mappings.go_down, mappings.go_down, opts)
-  vim.keymap.set('n', bufferlist.config.mappings.go_up, mappings.go_up, opts)
-
-  reset_lines()
-  update_lines()
-
-  vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
-  vim.api.nvim_set_option_value('signcolumn', 'no', { win = win })
-
-  win_config.hide = false
-  update_win()
+ui.open = function()
+  model:open()
 end
 
 return ui
