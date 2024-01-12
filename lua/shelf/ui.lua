@@ -11,7 +11,7 @@ function model:init()
   self.data.bufferlist__cut = 0
 
   -- reset movement keys
-  for _, k in ipairs { 'h', 'j', 'k', 'l', '<left>', '<down>', '<up>', 'right' } do
+  for _, k in ipairs { 'h', 'j', 'k', 'l', '<left>', '<down>', '<up>', '<right>' } do
     vim.keymap.set('n', k, '', { buffer = self.internal.buf })
   end
 
