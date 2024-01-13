@@ -122,6 +122,7 @@ function model:update(msg)
         return
       end
       self.data.bufferlist__cut = index
+      return true
     end,
     paste = function()
       if self.data.bufferlist__cut == 0 then
@@ -130,6 +131,7 @@ function model:update(msg)
       local new_index = get_current_index(self) + 1
 
       paste(self, new_index)
+      return true
     end,
     go_down = function()
       cursor_go(self, 1)
@@ -145,8 +147,7 @@ function model:update(msg)
       )
 
       self:send 'go_down'
-
-      return 'view'
+      return true
     end,
     move_up = function()
       local cur = get_current_index(self)
@@ -156,7 +157,7 @@ function model:update(msg)
       )
 
       self:send 'go_up'
-      -- return 'go_up'
+      return true
     end,
     open = function()
       local index = get_current_index(self)
@@ -167,6 +168,7 @@ function model:update(msg)
       self:send 'close'
 
       self.data.bufferlist:open(index)
+      return true
     end,
     create = function()
       vim.ui.input({ prompt = 'file:' }, function(input)
@@ -177,9 +179,8 @@ function model:update(msg)
           input = string.format('%s/%s', vim.fn.getcwd(), input)
         end
         self.data.bufferlist:append(input)
+        self:send 'view'
       end)
-      self:send 'view'
-      -- return 'view'
     end,
     close = function()
       _check_delete(self)
@@ -190,8 +191,8 @@ function model:update(msg)
     end,
     prepend = function()
       self:send 'paste'
-      -- self:send 'move_up'
-      return 'move_up'
+      self:send 'move_up'
+      return true
     end,
   }
 
