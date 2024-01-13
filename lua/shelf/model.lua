@@ -40,6 +40,9 @@ function Model:new(data, props)
       cursor = { 0, 0 },
       hls = {},
     },
+    _ = {
+      blacklist = {}
+    },
   }, self)
 
   return model
@@ -236,10 +239,21 @@ function Model:update(_) end
 ---@field send fun(self: core.types.ui.model, msg)
 ---@param msg string
 function Model:send(msg)
+  if msg ~= nil then
+    if self._.blacklist[msg] then
+      vim.notify(('stackoverflow on %s'):format(msg), vim.log.levels.WARN)
+      return
+    end
+    self._.blacklist[msg] = true
+  end
   self.internal.cmd = self:_update(msg)
 
   for _, cmd in ipairs(self.internal.cmd) do
     self:send(cmd)
+  end
+
+  if msg ~= nil then
+    self._.blacklist[msg] = false
   end
 end
 
