@@ -160,7 +160,6 @@ function model:update(msg)
       self:send 'close'
 
       self.data.bufferlist:open(index)
-      return true
     end,
     create = function()
       vim.ui.input({ prompt = 'file:' }, function(input)
