@@ -5,7 +5,7 @@ local api = vim.api
 local model = require 'core.ui'({
   bufferlist = require 'shelf.bufferlist',
   lines = { 0 },
-}, { title = 'bufferlist' })
+}, { title = 'bufferlist', persistent = true })
 
 function model:init()
   self.data.bufferlist__cut = 0
