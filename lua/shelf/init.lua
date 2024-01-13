@@ -12,6 +12,12 @@ local default_config = {
     go_down = 'j',
     go_up = 'k',
   },
+  ui = {
+    size = {
+      width = 90,
+      height = 0.8,
+    },
+  },
 }
 
 _G.shelf_config = vim.tbl_deep_extend('force', default_config, _G.shelf_config or {})
