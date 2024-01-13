@@ -93,13 +93,10 @@ function Bufferlist:add(index, name)
   if not index and not name then return end
 
   local nr = vim.api.nvim_create_buf(true, false)
-  vim.api.nvim_create_autocmd('BufFilePost', {
-    once = true,
-    buffer = nr,
-    desc = 'read file on enter',
-    command = 'e',
-  })
   vim.api.nvim_buf_set_name(nr, name)
+  vim.api.nvim_buf_call(nr, function()
+    vim.cmd.buffer()
+  end)
 
   table.insert(self.list, index, { nr, name })
 end
