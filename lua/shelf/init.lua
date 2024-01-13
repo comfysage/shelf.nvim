@@ -19,7 +19,7 @@ _G.shelf_config = vim.tbl_deep_extend('force', default_config, _G.shelf_config o
 local M = {}
 
 M.setup = function(config)
-  _G.shelf_config = vim.tbl_deep_extend('force', _G.shelf_config, config)
+  _G.shelf_config = vim.tbl_deep_extend('force', _G.shelf_config, config or {})
 end
 
 return M
