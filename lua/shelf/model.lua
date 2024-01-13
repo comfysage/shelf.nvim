@@ -160,7 +160,7 @@ function Model:add_hl(name, ...)
 end
 
 ---@class core.types.ui.model
----@field _update fun(self: core.types.ui.model, msg: string): any
+---@field _update fun(self: core.types.ui.model, msg?: string): any
 function Model:_update(msg)
   local fn = {
     quit = function()
@@ -209,13 +209,15 @@ function Model:_update(msg)
     end,
   }
 
-  local _fn = fn[msg]
-  if not _fn then
-    _fn = fn.view
-  end
+  msg = msg or 'view'
 
   local cmd = {}
-  cmd[#cmd+1] = _fn()
+
+  local _fn = fn[msg]
+  if _fn then
+    cmd[#cmd+1] = _fn()
+  end
+
   cmd[#cmd+1] = self:update(msg)
 
   return cmd
