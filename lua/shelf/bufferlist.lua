@@ -62,6 +62,12 @@ function Bufferlist:new()
 end
 
 ---@class Bufferlist
+---@field update fun(self: Bufferlist): Bufferlist
+function Bufferlist:update()
+  self.list = create_list()
+end
+
+---@class Bufferlist
 ---@field get_index fun(self: Bufferlist, props: { buf?: integer, name?: string }): integer
 function Bufferlist:get_index(props)
   if not (props.name or props.buf) then return 0 end
