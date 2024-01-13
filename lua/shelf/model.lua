@@ -248,9 +248,9 @@ function Model:send(msg)
     end
     self._.blacklist[msg] = true
   end
-  self.internal.cmd = self:_update(msg)
+  local cmds = self:_update(msg)
 
-  for _, cmd in ipairs(self.internal.cmd) do
+  for _, cmd in ipairs(cmds) do
     self:send(cmd)
   end
 
