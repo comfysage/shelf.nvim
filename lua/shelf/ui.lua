@@ -139,20 +139,14 @@ function model:update(msg)
     end,
     move_down = function()
       local cur = get_current_index(self)
-      self.data.bufferlist:move(
-        cur,
-        cur + 1
-      )
+      self.data.bufferlist:move(cur, cur + 1)
 
       self:send 'go_down'
       return true
     end,
     move_up = function()
       local cur = get_current_index(self)
-      self.data.bufferlist:move(
-        cur,
-        cur - 1
-      )
+      self.data.bufferlist:move(cur, cur - 1)
 
       self:send 'go_up'
       return true
