@@ -54,7 +54,7 @@ function model:view()
   end
 
   self.data.lines = lines
-  P(self.data.lines)
+  self:send 'fix_winheight'
   return lines
 end
 
@@ -101,7 +101,7 @@ end
 function model:update(msg)
   local fn = {
     -- fix winheight; adjust based on # of lines
-    winresize = function()
+    fix_winheight = function()
       local win_config = self.internal.window.config
       local winheight = self.internal.window.height
       local _height = self.internal.window.config.height
@@ -145,7 +145,8 @@ function model:update(msg)
       )
 
       self:send 'go_down'
-      -- return 'go_down'
+
+      return 'view'
     end,
     move_up = function()
       local cur = get_current_index(self)
