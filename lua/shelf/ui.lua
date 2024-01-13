@@ -119,6 +119,10 @@ function model:update(msg)
       self.internal.window.config = win_config
       api.nvim_win_set_config(self.internal.win, self.internal.window.config)
     end,
+    show = function()
+      self.data.bufferlist:update()
+      return true
+    end,
     cut = function()
       _check_delete(self)
 
