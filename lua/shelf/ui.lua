@@ -2,7 +2,7 @@ local ui = {}
 
 local api = vim.api
 
-local model = require 'shelf.model'({
+local model = require 'core.ui'({
   bufferlist = require 'shelf.bufferlist',
   lines = { 0 },
 }, { title = 'bufferlist' })
@@ -33,8 +33,6 @@ function model:init()
   self:add_mapping('n', self.data.bufferlist.config.mappings.go_up, 'go_up')
 
   api.nvim_set_option_value('number', true, { win = self.internal.win })
-
-  self:send 'view'
 end
 
 function model:view()
