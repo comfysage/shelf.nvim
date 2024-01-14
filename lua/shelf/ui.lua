@@ -77,6 +77,7 @@ local function _check_delete(props)
       vim.log.levels.DEBUG
     )
     props.data.bufferlist:delete(props.data.bufferlist__cut)
+    props.data.bufferlist__cut = 0
   end
 end
 ---@param props core.types.ui.model
