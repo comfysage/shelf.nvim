@@ -15,7 +15,7 @@ local model = require 'core.ui'({
 })
 
 function model:init()
-  self.data.bufferlist__cut = 0
+  self:send 'reset_state'
 
   -- reset movement keys
   for _, k in ipairs { 'h', 'j', 'k', 'l', '<left>', '<down>', '<up>', '<right>' } do
@@ -70,17 +70,6 @@ local function get_current_index(props)
   return pos[1]
 end
 ---@param props core.types.ui.model
-local function _check_delete(props)
-  if props.data.bufferlist__cut > 0 then
-    vim.notify(
-      string.format('delete cut item [%d]', props.data.bufferlist__cut),
-      vim.log.levels.DEBUG
-    )
-    props.data.bufferlist:delete(props.data.bufferlist__cut)
-    props.data.bufferlist__cut = 0
-  end
-end
----@param props core.types.ui.model
 ---@param index integer
 local function paste(props, index)
   -- account for moving the value to a new position while the old one still exists
@@ -128,8 +117,21 @@ function model:update(msg)
     opts = function()
       api.nvim_set_option_value('number', true, { win = self.internal.win })
     end,
+    reset_state = function()
+      self.data.bufferlist__cut = 0
+    end,
+    check_delete = function()
+      if self.data.bufferlist__cut > 0 then
+        vim.notify(
+          string.format('delete cut item [%d]', self.data.bufferlist__cut),
+          vim.log.levels.DEBUG
+        )
+        self.data.bufferlist:delete(self.data.bufferlist__cut)
+        self:send 'reset_state'
+      end
+    end,
     cut = function()
-      _check_delete(self)
+      self:send 'check_delete'
 
       local index = get_current_index(self)
       if index == 0 then
@@ -190,7 +192,7 @@ function model:update(msg)
       end)
     end,
     close = function()
-      _check_delete(self)
+      self:send 'check_delete'
 
       _G.bufferlist = self.data.bufferlist
 
