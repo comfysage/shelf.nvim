@@ -11,6 +11,18 @@ Bufferlist.__index = Bufferlist
 
 ---@alias shelf.types.bufferlist.list { [integer]: { [1]: integer, [2]: string } }
 
+---@param name string
+---@return integer
+local function create_buf(name)
+  local nr = vim.api.nvim_create_buf(true, false)
+  vim.api.nvim_buf_set_name(nr, name)
+  vim.api.nvim_buf_call(nr, function()
+    vim.cmd.buffer()
+  end)
+
+  return nr
+end
+
 ---@return shelf.types.bufferlist.list
 local function create_list()
   local old_list = _G.bufferlist and _G.bufferlist.list or {}
@@ -105,11 +117,7 @@ end
 function Bufferlist:add(index, name)
   if not index and not name then return end
 
-  local nr = vim.api.nvim_create_buf(true, false)
-  vim.api.nvim_buf_set_name(nr, name)
-  vim.api.nvim_buf_call(nr, function()
-    vim.cmd.buffer()
-  end)
+  local nr = create_buf(name)
 
   table.insert(self.list, index, { nr, name })
 end
