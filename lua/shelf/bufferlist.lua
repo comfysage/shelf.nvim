@@ -32,10 +32,12 @@ local function create_list()
 
   for _, item in ipairs(old_list) do
     local bufnr = item[1]
-    if vim.api.nvim_buf_is_loaded(bufnr) and vim.api.nvim_buf_is_valid(bufnr) then
-      list[#list + 1] = { bufnr, nil }
-      _added[bufnr] = true
+    if not vim.api.nvim_buf_is_valid(bufnr) then
+      local name = item[2]
+      bufnr = create_buf(name)
     end
+    list[#list + 1] = { bufnr, nil }
+    _added[bufnr] = true
   end
 
   for _, bufnr in ipairs(bufnr_list) do
