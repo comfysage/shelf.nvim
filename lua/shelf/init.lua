@@ -1,4 +1,5 @@
 local default_config = {
+  cache_file = vim.fn.stdpath 'data' .. '/shelf.cache.json',
   mappings = {
     close = 'q',
     quit = '<esc>', -- close without applying changes
