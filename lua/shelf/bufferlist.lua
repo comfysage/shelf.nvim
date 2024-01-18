@@ -89,8 +89,15 @@ function Bufferlist:delete(index)
   local item = self.list[index]
   if not item then return end
 
-  print(string.format('bufferlist: delete buffer %d [%s]', item[1], item[2]))
-  vim.api.nvim_buf_delete(item[1], {})
+  local buf, name = unpack(item, 1, 2)
+  vim.notify(
+    string.format('bufferlist: delete buffer %d [%s]', buf, name),
+    vim.log.levels.DEBUG
+  )
+  ---@diagnostic disable-next-line: param-type-mismatch
+  vim.api.nvim_buf_delete(buf, {})
+
+  table.remove(self.list, index)
 end
 
 ---@class Bufferlist
