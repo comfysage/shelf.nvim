@@ -1,17 +1,17 @@
----@class Bufferlist
----@field __index Bufferlist
+---@class shelf.types.bufferlist
+---@field __index shelf.types.bufferlist
 ---@field config table
----@field list Bufferlist__list
+---@field list shelf.types.bufferlist.list
 
----@type Bufferlist
+---@type shelf.types.bufferlist
 ---@diagnostic disable-next-line missing-fields
 local Bufferlist = {}
 
 Bufferlist.__index = Bufferlist
 
----@alias Bufferlist__list { [integer]: { [1]: integer, [2]: string } }
+---@alias shelf.types.bufferlist.list { [integer]: { [1]: integer, [2]: string } }
 
----@return Bufferlist__list
+---@return shelf.types.bufferlist.list
 local function create_list()
   local old_list = _G.bufferlist and _G.bufferlist.list or {}
   local bufnr_list = vim.api.nvim_list_bufs()
@@ -50,8 +50,8 @@ local function create_list()
   return list
 end
 
----@class Bufferlist
----@field new fun(self: Bufferlist): Bufferlist
+---@class shelf.types.bufferlist
+---@field new fun(self: shelf.types.bufferlist): shelf.types.bufferlist
 function Bufferlist:new()
   local bufferlist = setmetatable({
     config = shelf_config,
@@ -61,14 +61,14 @@ function Bufferlist:new()
   return bufferlist
 end
 
----@class Bufferlist
----@field update fun(self: Bufferlist): Bufferlist
+---@class shelf.types.bufferlist
+---@field update fun(self: shelf.types.bufferlist): shelf.types.bufferlist
 function Bufferlist:update()
   self.list = create_list()
 end
 
----@class Bufferlist
----@field get_index fun(self: Bufferlist, props: { buf?: integer, name?: string }): integer
+---@class shelf.types.bufferlist
+---@field get_index fun(self: shelf.types.bufferlist, props: { buf?: integer, name?: string }): integer
 function Bufferlist:get_index(props)
   if not (props.name or props.buf) then return 0 end
 
@@ -81,8 +81,8 @@ function Bufferlist:get_index(props)
   return 0
 end
 
----@class Bufferlist
----@field delete fun(self: Bufferlist, index: integer)
+---@class shelf.types.bufferlist
+---@field delete fun(self: shelf.types.bufferlist, index: integer)
 function Bufferlist:delete(index)
   if not index then return end
 
@@ -100,8 +100,8 @@ function Bufferlist:delete(index)
   table.remove(self.list, index)
 end
 
----@class Bufferlist
----@field add fun(self: Bufferlist, index: integer, name: string)
+---@class shelf.types.bufferlist
+---@field add fun(self: shelf.types.bufferlist, index: integer, name: string)
 function Bufferlist:add(index, name)
   if not index and not name then return end
 
@@ -114,16 +114,16 @@ function Bufferlist:add(index, name)
   table.insert(self.list, index, { nr, name })
 end
 
----@class Bufferlist
----@field append fun(self: Bufferlist, name: string)
+---@class shelf.types.bufferlist
+---@field append fun(self: shelf.types.bufferlist, name: string)
 function Bufferlist:append(name)
   if not name then return end
 
   self:add(#self.list + 1, name)
 end
 
----@class Bufferlist
----@field move fun(self: Bufferlist, old: integer, new: integer)
+---@class shelf.types.bufferlist
+---@field move fun(self: shelf.types.bufferlist, old: integer, new: integer)
 function Bufferlist:move(old, new)
   vim.notify(string.format('move [%d] to [%d]', old, new), vim.log.levels.DEBUG)
   local value = self.list[old]
@@ -131,8 +131,8 @@ function Bufferlist:move(old, new)
   table.insert(self.list, new, value)
 end
 
----@class Bufferlist
----@field open fun(self: Bufferlist, index: integer)
+---@class shelf.types.bufferlist
+---@field open fun(self: shelf.types.bufferlist, index: integer)
 function Bufferlist:open(index)
   local item = self.list[index]
   if not item then return end
