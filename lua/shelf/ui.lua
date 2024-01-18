@@ -39,7 +39,7 @@ function model:init()
   self:add_mapping('n', self.data.bufferlist.config.mappings.go_down, 'go_down')
   self:add_mapping('n', self.data.bufferlist.config.mappings.go_up, 'go_up')
 
-  api.nvim_set_option_value('number', true, { win = self.internal.win })
+  self:send 'opts'
 end
 
 function model:view()
@@ -123,6 +123,9 @@ function model:update(msg)
     show = function()
       self.data.bufferlist:update()
       return true
+    end,
+    opts = function()
+      api.nvim_set_option_value('number', true, { win = self.internal.win })
     end,
     cut = function()
       _check_delete(self)
