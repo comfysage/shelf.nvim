@@ -121,6 +121,7 @@ function model:update(msg)
       api.nvim_win_set_config(self.internal.win, self.internal.window.config)
     end,
     show = function()
+      self:send 'opts'
       self.data.bufferlist:update()
       return true
     end,
