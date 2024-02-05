@@ -23,21 +23,21 @@ function model:init()
   end
 
   self:add_mapping('n', 'q', 'close')
-  self:add_mapping('n', self.data.bufferlist.config.mappings.close, 'close')
-  self:add_mapping('n', self.data.bufferlist.config.mappings.quit, 'quit')
-  self:add_mapping('n', self.data.bufferlist.config.mappings.open, 'open')
-  self:add_mapping('n', self.data.bufferlist.config.mappings.cut, 'cut')
-  self:add_mapping('n', self.data.bufferlist.config.mappings.paste, 'paste')
-  self:add_mapping('n', self.data.bufferlist.config.mappings.prepend, 'prepend')
+  self:add_mapping('n', shelf_config.mappings.close, 'close')
+  self:add_mapping('n', shelf_config.mappings.quit, 'quit')
+  self:add_mapping('n', shelf_config.mappings.open, 'open')
+  self:add_mapping('n', shelf_config.mappings.cut, 'cut')
+  self:add_mapping('n', shelf_config.mappings.paste, 'paste')
+  self:add_mapping('n', shelf_config.mappings.prepend, 'prepend')
   self:add_mapping(
     'n',
-    self.data.bufferlist.config.mappings.move_down,
+    shelf_config.mappings.move_down,
     'move_down'
   )
-  self:add_mapping('n', self.data.bufferlist.config.mappings.move_up, 'move_up')
-  self:add_mapping('n', self.data.bufferlist.config.mappings.create, 'create')
-  self:add_mapping('n', self.data.bufferlist.config.mappings.go_down, 'go_down')
-  self:add_mapping('n', self.data.bufferlist.config.mappings.go_up, 'go_up')
+  self:add_mapping('n', shelf_config.mappings.move_up, 'move_up')
+  self:add_mapping('n', shelf_config.mappings.create, 'create')
+  self:add_mapping('n', shelf_config.mappings.go_down, 'go_down')
+  self:add_mapping('n', shelf_config.mappings.go_up, 'go_up')
 
   self:send 'opts'
 end
