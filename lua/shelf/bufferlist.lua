@@ -14,11 +14,11 @@ Bufferlist.__index = Bufferlist
 ---@param name string
 ---@return integer
 local function create_buf(name)
-  local nr = vim.api.nvim_create_buf(true, false)
-  vim.api.nvim_buf_set_name(nr, name)
+  local nr = vim.fn.bufadd(name)
   vim.api.nvim_buf_call(nr, function()
     vim.cmd.buffer()
   end)
+  vim.fn.bufload(nr)
 
   return nr
 end
