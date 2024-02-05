@@ -1,23 +1,36 @@
 require 'shelf.bufferlist'
 
 local default_config = {
+  -- cache file where bufferlists are saved
   cache_file = vim.fn.stdpath 'data' .. '/shelf.cache.json',
+  -- mappings for shelf ui
   mappings = {
+    -- move up and down the list
+    go_down = 'j',
+    go_up = 'k',
+    -- close the window
     close = 'q',
-    quit = '<esc>', -- close without applying changes
+    -- close without applying changes
+    quit = '<esc>',
+    -- open current item
     open = '<cr>',
+    -- cut item (so it can be pasted elsewhere in the list)
     cut = 'dd',
     paste = 'p',
     prepend = 'P',
+    -- move current item one index down
     move_down = 'J',
+    -- move current item one index up
     move_up = 'K',
+    -- add a new item to the bufferlist
     create = 'a',
-    go_down = 'j',
-    go_up = 'k',
   },
   ui = {
     size = {
+      -- size fields can be either an absolute integer size or a number between 0 and 1
+      -- window is 90 characters wide
       width = 90,
+      -- max window height is 90% of editor height
       height = 0.9,
     },
   },
