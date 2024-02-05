@@ -36,13 +36,14 @@ local function create_list()
       bufnr = -1
     end
     list[#list + 1] = { bufnr, name }
-    _added[bufnr] = true
+    _added[name] = true
   end
 
   for _, bufnr in ipairs(bufnr_list) do
-    if not _added[bufnr] then
+    local name = vim.api.nvim_buf_get_name(bufnr)
+    if not _added[name] then
       if vim.api.nvim_buf_is_loaded(bufnr) and vim.api.nvim_buf_is_valid(bufnr) then
-        list[#list + 1] = { bufnr, nil }
+        list[#list + 1] = { bufnr, name }
       end
     end
   end
@@ -57,13 +58,6 @@ local function create_list()
     --   return false
     -- end
     return true
-  end, list)
-  list = vim.tbl_map(function(item)
-    if item[1] > -1 then
-      return { item[1], vim.api.nvim_buf_get_name(item[1]) }
-    else
-      return { -1, item[2] }
-    end
   end, list)
 
   return list
