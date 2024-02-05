@@ -19,17 +19,12 @@ function Data:new()
 
   data:cfg_local()
 
-  local ok = data:read()
-  if ok then
-    data:cfg_global()
-  end
-
   return data
 end
 
 ---@class shelf.types.data
----@field _read fun(self: shelf.types.data): boolean, shelf.types.data.value?
-function Data:_read()
+---@field read_data fun(self: shelf.types.data): boolean, shelf.types.data.value?
+function Data:read_data()
   local fh = io.open(shelf_config.cache_file, 'r')
   if not fh then
     return false, nil
@@ -48,10 +43,10 @@ function Data:_read()
 end
 
 ---@class shelf.types.data
----@field read fun(self: shelf.types.data): boolean
-function Data:read()
+---@field _read fun(self: shelf.types.data): boolean
+function Data:_read()
   local cwd = vim.fn.getcwd()
-  local ok, data = self:_read()
+  local ok, data = self:read_data()
   if ok and data and data.list[cwd] then
     local _added = {}
     for _, name in ipairs(self.data.list[cwd]) do
@@ -68,9 +63,20 @@ function Data:read()
 end
 
 ---@class shelf.types.data
+---@field read fun(self: shelf.types.data): boolean
+function Data:read()
+  local ok = self:_read()
+  if ok then
+    self:cfg_global()
+  end
+
+  return ok
+end
+
+---@class shelf.types.data
 ---@field fill fun(self: shelf.types.data): boolean
 function Data:fill()
-  local ok, data = self:_read()
+  local ok, data = self:read_data()
   if ok and data then
     self.data = vim.tbl_deep_extend('keep', self.data, data)
   end
@@ -81,6 +87,7 @@ end
 ---@class shelf.types.data
 ---@field write fun(self: shelf.types.data)
 function Data:write()
+  self:cfg_local()
   self:fill()
   local fh = io.open(shelf_config.cache_file, 'w+')
   if not fh then
@@ -109,6 +116,9 @@ function Data:_cfg()
   _G.bufferlist = _G.bufferlist or {}
 end
 
+--- configure global data
+--- - add new items from data to bufferlist
+--- - call `bufferlist:update()`
 ---@class shelf.types.data
 ---@field cfg_global fun(self: shelf.types.data)
 function Data:cfg_global()
@@ -129,6 +139,9 @@ function Data:cfg_global()
   _G.bufferlist:update()
 end
 
+--- configure local data
+--- - call `bufferlist:update()`
+--- - update local data list for cwd with bufferlist
 ---@class shelf.types.data
 ---@field cfg_local fun(self: shelf.types.data)
 function Data:cfg_local()

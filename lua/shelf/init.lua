@@ -28,7 +28,7 @@ _G.shelf_config = vim.tbl_deep_extend('force', default_config, _G.shelf_config o
 local M = {}
 
 M.read = function()
-  require 'shelf.data':new()
+  require 'shelf.data':new():read()
 end
 M.write = function()
   require 'shelf.data':new():write()
