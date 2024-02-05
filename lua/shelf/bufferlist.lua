@@ -14,11 +14,11 @@ Bufferlist.__index = Bufferlist
 ---@param name string
 ---@return integer
 local function create_buf(name)
+  vim.notify(('creating buffer [%s]'):format(name), vim.log.levels.DEBUG)
   local nr = vim.fn.bufadd(name)
   vim.api.nvim_buf_call(nr, function()
     vim.cmd.buffer()
   end)
-  vim.fn.bufload(nr)
 
   return nr
 end
@@ -32,11 +32,11 @@ local function create_list()
 
   for _, item in ipairs(old_list) do
     local bufnr = item[1]
+    local name = item[2]
     if not vim.api.nvim_buf_is_valid(bufnr) then
-      local name = item[2]
-      bufnr = create_buf(name)
+      bufnr = -1
     end
-    list[#list + 1] = { bufnr, nil }
+    list[#list + 1] = { bufnr, name }
     _added[bufnr] = true
   end
 
@@ -49,8 +49,10 @@ local function create_list()
   end
 
   list = vim.tbl_filter(function(item)
-    if 1 ~= vim.fn.buflisted(item[1]) then
-      return false
+    if item[1] > -1 then
+      if 1 ~= vim.fn.buflisted(item[1]) then
+        return false
+      end
     end
     -- if string.len(item[2]) == 0 then
     --   return false
@@ -58,7 +60,11 @@ local function create_list()
     return true
   end, list)
   list = vim.tbl_map(function(item)
-    return { item[1], vim.api.nvim_buf_get_name(item[1]) }
+    if item[1] > -1 then
+      return { item[1], vim.api.nvim_buf_get_name(item[1]) }
+    else
+      return { -1, item[2] }
+    end
   end, list)
 
   return list
@@ -87,7 +93,9 @@ function Bufferlist:get_index(props)
   if not (props.name or props.buf) then return 0 end
 
   for i, v in ipairs(self.list) do
-    if (props.buf and v[1] == props.buf) or (props.name and v[2] == props.name) then
+    if props.name and v[2] == props.name then
+      return i
+    elseif props.buf and props.buf ~= -1 and v[1] == props.buf then
       return i
     end
   end
@@ -108,8 +116,10 @@ function Bufferlist:delete(index)
     string.format('bufferlist: delete buffer %d [%s]', buf, name),
     vim.log.levels.DEBUG
   )
-  ---@diagnostic disable-next-line: param-type-mismatch
-  vim.api.nvim_buf_delete(buf, {})
+  if buf ~= -1 then
+    ---@diagnostic disable-next-line: param-type-mismatch
+    vim.api.nvim_buf_delete(buf, {})
+  end
 
   table.remove(self.list, index)
 end
@@ -119,9 +129,7 @@ end
 function Bufferlist:add(index, name)
   if not index and not name then return end
 
-  local nr = create_buf(name)
-
-  table.insert(self.list, index, { nr, name })
+  table.insert(self.list, index, { -1, name })
 end
 
 ---@class shelf.types.bufferlist
@@ -147,6 +155,10 @@ function Bufferlist:open(index)
   local item = self.list[index]
   if not item then return end
   local nr = item[1]
+  if nr < 0 then
+    nr = create_buf(item[2])
+    self.list[index][1] = nr
+  end
   vim.api.nvim_set_current_buf(nr)
 end
 
