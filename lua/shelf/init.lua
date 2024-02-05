@@ -18,7 +18,7 @@ local default_config = {
   ui = {
     size = {
       width = 90,
-      height = 0.8,
+      height = 0.9,
     },
   },
 }
