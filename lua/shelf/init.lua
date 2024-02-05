@@ -25,20 +25,27 @@ _G.shelf_config = vim.tbl_deep_extend('force', default_config, _G.shelf_config o
 
 local M = {}
 
+M.read = function()
+  require 'shelf.bufferlist'
+
+  require 'shelf.data':new()
+end
+M.write = function()
+  require 'shelf.data':new():write()
+end
+
 M.setup = function(config)
   _G.shelf_config = vim.tbl_deep_extend('force', _G.shelf_config, config or {})
 
   vim.api.nvim_create_autocmd({ 'VimEnter' }, {
     once = true,
     callback = function(_)
-      require 'shelf.bufferlist'
-
-      require 'shelf.data':new()
+      require 'shelf'.read()
     end,
   })
   vim.api.nvim_create_autocmd('VimLeavePre', {
     callback = function(_)
-      require 'shelf.data':new():write()
+      require 'shelf'.write()
     end,
   })
 end
