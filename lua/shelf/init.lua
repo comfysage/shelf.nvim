@@ -1,3 +1,5 @@
+require 'shelf.bufferlist'
+
 local default_config = {
   cache_file = vim.fn.stdpath 'data' .. '/shelf.cache.json',
   mappings = {
@@ -26,8 +28,6 @@ _G.shelf_config = vim.tbl_deep_extend('force', default_config, _G.shelf_config o
 local M = {}
 
 M.read = function()
-  require 'shelf.bufferlist'
-
   require 'shelf.data':new()
 end
 M.write = function()
