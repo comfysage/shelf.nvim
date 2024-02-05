@@ -1,6 +1,5 @@
 ---@class shelf.types.bufferlist
 ---@field __index shelf.types.bufferlist
----@field config table
 ---@field list shelf.types.bufferlist.list
 
 ---@type shelf.types.bufferlist
@@ -74,7 +73,6 @@ end
 ---@field new fun(self: shelf.types.bufferlist): shelf.types.bufferlist
 function Bufferlist:new()
   local bufferlist = setmetatable({
-    config = shelf_config,
     list = create_list(),
   }, self)
 
