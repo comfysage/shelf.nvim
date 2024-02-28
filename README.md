@@ -9,14 +9,14 @@ similar to [harpoon](https://github.com/ThePrimeagen/harpoon/tree/harpoon2).
 ## :lock: requirements
 
 - Neovim `>= 0.9.0` (needs to be built with LuaJIT)
-- [chaivim](https://github.com/crispybaccoon/chaivim)
+- [chaivim](https://github.com/comfysage/chaivim)
 
 ## :package: installation
 
 shelf can be installed by adding *this* to your `lua/plugins/init.lua`.
 ```lua
 {
-    'crispybaccoon/shelf.nvim',
+    'comfysage/shelf.nvim',
     opts = {},
     config = function(_, opts)
         require 'shelf'.setup(opts)
