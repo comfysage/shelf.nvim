@@ -31,11 +31,7 @@ function model:init()
   self:add_mapping('n', config.mappings.cut, 'cut')
   self:add_mapping('n', config.mappings.paste, 'paste')
   self:add_mapping('n', config.mappings.prepend, 'prepend')
-  self:add_mapping(
-    'n',
-    config.mappings.move_down,
-    'move_down'
-  )
+  self:add_mapping('n', config.mappings.move_down, 'move_down')
   self:add_mapping('n', config.mappings.move_up, 'move_up')
   self:add_mapping('n', config.mappings.create, 'create')
   self:add_mapping('n', config.mappings.go_down, 'go_down')

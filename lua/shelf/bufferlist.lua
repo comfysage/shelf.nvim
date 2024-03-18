@@ -48,7 +48,8 @@ function Bufferlist:register_buffers()
     if vim.bo[bufnr].buftype ~= '' then
       return false
     end
-    return vim.api.nvim_buf_is_loaded(bufnr) and vim.api.nvim_buf_is_valid(bufnr)
+    return vim.api.nvim_buf_is_loaded(bufnr)
+      and vim.api.nvim_buf_is_valid(bufnr)
   end, buflist)
   buflist = vim.tbl_map(function(bufnr)
     return vim.api.nvim_buf_get_name(bufnr)
