@@ -100,8 +100,8 @@ function model:update(msg)
       local win_config = self.internal.window.config
       local winheight = self.internal.window.height
       local _height = self.internal.window.config.height
-      local lines = self.data.lines
-      _height = #lines > _height and _height or #lines
+      local nr_lines = math.max(#self.data.lines, 1)
+      _height = nr_lines > _height and _height or nr_lines
 
       win_config.row = math.floor((winheight - _height) / 2)
       win_config.height = _height
