@@ -10,7 +10,7 @@ Config.__index = Config
 function Config:new()
   local config = setmetatable({
     -- cache file where bufferlists are saved
-    cache_file = vim.fn.stdpath 'data' .. '/shelf.cache.json',
+    cache_file = vim.fn.stdpath 'state' .. '/shelf.list.json',
     -- mappings for shelf ui
     mappings = {
       -- move up and down the list
