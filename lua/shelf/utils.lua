@@ -1,37 +1,15 @@
 local utils = {}
 
-utils.reorder = function(bufnr, nbufnr) end
+---@param name string
+---@return integer
+utils.create_buf = function(name)
+  vim.notify(('creating buffer [%s]'):format(name), vim.log.levels.DEBUG)
+  local nr = vim.fn.bufadd(name)
+  vim.api.nvim_buf_call(nr, function()
+    vim.cmd.buffer()
+  end)
 
-utils.simplify = function() end
-
-local function _getids(layout)
-  local _layout = layout
-  if layout[1] == 'leaf' then
-    return { layout[2] }
-  elseif layout[1] == 'row' then
-    return { layout[2][1][2] }
-  end
-  local ids = {}
-  for _, l in ipairs(layout[2]) do
-    local _ids = _getids(l)
-    local j = #ids
-    for i, id in ipairs(_ids) do
-      ids[i+j] = id
-    end
-  end
-  return ids
-end
-
-utils.getheight = function()
-  local layout = vim.fn.winlayout()
-  local id = _getids(layout)
-  local sum = 0
-  vim.tbl_map(function(_id)
-    local height = vim.api.nvim_win_get_height(_id)
-    sum = sum + height
-  end, id)
-
-  return sum
+  return nr
 end
 
 return utils

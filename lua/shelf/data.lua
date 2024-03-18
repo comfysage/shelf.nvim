@@ -17,7 +17,7 @@ function Data:new()
     },
   }, self)
 
-  data:cfg_local()
+  data:sync_list()
 
   return data
 end
@@ -25,7 +25,7 @@ end
 ---@class shelf.types.data
 ---@field read_data fun(self: shelf.types.data): boolean, shelf.types.data.value?
 function Data:read_data()
-  local fh = io.open(shelf_config.cache_file, 'r')
+  local fh = io.open(require('shelf.config').cache_file, 'r')
   if not fh then
     return false, nil
   end
@@ -54,7 +54,7 @@ function Data:_read()
     end
     for _, name in ipairs(data.list[cwd]) do
       if not _added[name] then
-        self.data.list[cwd][#self.data.list[cwd]+1] = name
+        self.data.list[cwd][#self.data.list[cwd] + 1] = name
       end
     end
   end
@@ -67,7 +67,7 @@ end
 function Data:read()
   local ok = self:_read()
   if ok then
-    self:cfg_global()
+    self:register_list()
   end
 
   return ok
@@ -87,9 +87,9 @@ end
 ---@class shelf.types.data
 ---@field write fun(self: shelf.types.data)
 function Data:write()
-  self:cfg_local()
+  self:sync_list()
   self:fill()
-  local fh = io.open(shelf_config.cache_file, 'w+')
+  local fh = io.open(require('shelf.config').cache_file, 'w+')
   if not fh then
     return
   end
@@ -110,47 +110,26 @@ function Data:clean()
   end
 end
 
----@class shelf.types.data
----@field _cfg fun(self: shelf.types.data)
-function Data:_cfg()
-  _G.bufferlist = _G.bufferlist or {}
-end
-
 --- configure global data
 --- - add new items from data to bufferlist
---- - call `bufferlist:update()`
 ---@class shelf.types.data
----@field cfg_global fun(self: shelf.types.data)
-function Data:cfg_global()
-  self:_cfg()
+---@field register_list fun(self: shelf.types.data)
+function Data:register_list()
   local cwd = vim.fn.getcwd()
-  if self.data.list[cwd] then
-    local _added = {}
-    for _, item in ipairs(_G.bufferlist.list) do
-      local name = item[2]
-      _added[name] = true
-    end
-    for _, name in ipairs(self.data.list[cwd]) do
-      if not _added[name] then
-        _G.bufferlist.list[#_G.bufferlist.list+1] = { -1, name }
-      end
-    end
-  end
-  _G.bufferlist:update()
+  require('shelf'):list():register(self.data.list[cwd])
 end
 
 --- configure local data
 --- - call `bufferlist:update()`
 --- - update local data list for cwd with bufferlist
 ---@class shelf.types.data
----@field cfg_local fun(self: shelf.types.data)
-function Data:cfg_local()
-  self:_cfg()
+---@field sync_list fun(self: shelf.types.data)
+function Data:sync_list()
   local cwd = vim.fn.getcwd()
-  _G.bufferlist:update()
+  require('shelf'):list():update()
   self.data.list[cwd] = vim.tbl_map(function(item)
     return item[2]
-  end, _G.bufferlist.list)
+  end, require('shelf'):list())
 end
 
-return Data
+return Data:new()

@@ -1,3 +1,5 @@
+local config = require 'shelf.config'
+
 local ui = {}
 
 local api = vim.api
@@ -9,8 +11,8 @@ local model = require 'core.ui'({
   title = 'bufferlist',
   persistent = true,
   size = {
-    width = shelf_config.ui.size.width,
-    height = shelf_config.ui.size.height,
+    width = config.ui.size.width,
+    height = config.ui.size.height,
   },
 })
 
@@ -23,21 +25,21 @@ function model:init()
   end
 
   self:add_mapping('n', 'q', 'close')
-  self:add_mapping('n', shelf_config.mappings.close, 'close')
-  self:add_mapping('n', shelf_config.mappings.quit, 'quit')
-  self:add_mapping('n', shelf_config.mappings.open, 'open')
-  self:add_mapping('n', shelf_config.mappings.cut, 'cut')
-  self:add_mapping('n', shelf_config.mappings.paste, 'paste')
-  self:add_mapping('n', shelf_config.mappings.prepend, 'prepend')
+  self:add_mapping('n', config.mappings.close, 'close')
+  self:add_mapping('n', config.mappings.quit, 'quit')
+  self:add_mapping('n', config.mappings.open, 'open')
+  self:add_mapping('n', config.mappings.cut, 'cut')
+  self:add_mapping('n', config.mappings.paste, 'paste')
+  self:add_mapping('n', config.mappings.prepend, 'prepend')
   self:add_mapping(
     'n',
-    shelf_config.mappings.move_down,
+    config.mappings.move_down,
     'move_down'
   )
-  self:add_mapping('n', shelf_config.mappings.move_up, 'move_up')
-  self:add_mapping('n', shelf_config.mappings.create, 'create')
-  self:add_mapping('n', shelf_config.mappings.go_down, 'go_down')
-  self:add_mapping('n', shelf_config.mappings.go_up, 'go_up')
+  self:add_mapping('n', config.mappings.move_up, 'move_up')
+  self:add_mapping('n', config.mappings.create, 'create')
+  self:add_mapping('n', config.mappings.go_down, 'go_down')
+  self:add_mapping('n', config.mappings.go_up, 'go_up')
 
   self:send 'opts'
 end
