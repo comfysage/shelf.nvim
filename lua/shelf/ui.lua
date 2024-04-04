@@ -4,7 +4,7 @@ local ui = {}
 
 local api = vim.api
 
-local model = require 'core.ui'({
+local model = require 'core.ui.internal.model'({
   bufferlist = require 'shelf.bufferlist',
   lines = { 0 },
 }, {
