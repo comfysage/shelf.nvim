@@ -17,6 +17,7 @@ local model = require 'core.ui.internal.model'({
 })
 
 function model:init()
+  self.data.bufferlist:update()
   self:send 'reset_state'
 
   -- reset movement keys
