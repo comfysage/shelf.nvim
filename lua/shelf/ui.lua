@@ -4,12 +4,20 @@ local ui = {}
 
 local api = vim.api
 
+local function not_empty(v)
+  return vim.fn.empty(v) ~= 1
+end
+
 local model = require 'core.ui.internal.model'({
   bufferlist = require 'shelf.bufferlist',
-  lines = { 0 },
+  -- list as drawn lines
+  lines = {},
+  -- list as edited state
+  state = {},
 }, {
   title = 'bufferlist',
   persistent = true,
+  text_edit = true,
   size = {
     width = config.ui.size.width,
     height = config.ui.size.height,
@@ -19,44 +27,32 @@ local model = require 'core.ui.internal.model'({
 function model:init()
   self.data.bufferlist:update()
   self:send 'reset_state'
-
-  -- reset movement keys
-  for _, k in ipairs { 'h', 'j', 'k', 'l', '<left>', '<down>', '<up>', '<right>' } do
-    vim.keymap.set('n', k, '', { buffer = self.internal.buf })
-  end
+  self:on('ModeChanged', function(props)
+    if props.match == 'i:n' then
+      self:send 'text_changed'
+    end
+  end, {})
 
   self:add_mapping('n', 'q', 'close')
   self:add_mapping('n', config.mappings.close, 'close')
   self:add_mapping('n', config.mappings.quit, 'quit')
   self:add_mapping('n', config.mappings.open, 'open')
-  self:add_mapping('n', config.mappings.cut, 'cut')
-  self:add_mapping('n', config.mappings.paste, 'paste')
-  self:add_mapping('n', config.mappings.prepend, 'prepend')
-  self:add_mapping('n', config.mappings.move_down, 'move_down')
-  self:add_mapping('n', config.mappings.move_up, 'move_up')
-  self:add_mapping('n', config.mappings.create, 'create')
-  self:add_mapping('n', config.mappings.go_down, 'go_down')
-  self:add_mapping('n', config.mappings.go_up, 'go_up')
+  self:add_mapping('n', config.mappings.apply, 'apply_state')
+  self:add_mapping('n', config.mappings.reset, 'reset_state')
 
   self:send 'opts'
 end
 
+local function draw(v)
+  local name = v[2]
+  local line =
+  string.gsub(name, string.format('^%s', vim.fn.getcwd() .. '/'), '')
+
+  return line
+end
+
 function model:view()
-  local function draw(index)
-    local v = self.data.bufferlist.list[index]
-    local name = v[2]
-    local line =
-      string.gsub(name, string.format('^%s', vim.fn.getcwd() .. '/'), '')
-
-    return line
-  end
-  local lines = {}
-  for i, _ in ipairs(self.data.bufferlist.list) do
-    if i ~= self.data.bufferlist__cut then
-      lines[#lines + 1] = draw(i)
-    end
-  end
-
+  local lines = vim.iter(self.data.state):map(draw):totable()
   self.data.lines = lines
   self:send 'fix_winheight'
   return lines
@@ -68,28 +64,68 @@ local function get_current_index(props)
   local pos = api.nvim_win_get_cursor(props.internal.win)
   return pos[1]
 end
+
 ---@param props core.types.ui.model
----@param index integer
-local function paste(props, index)
-  -- account for moving the value to a new position while the old one still exists
-  if index > props.data.bufferlist__cut then
-    index = index - 1
+local function state_diff(props)
+  local function get_second(array)
+    return array[2]
+  end
+  local current_list = vim.iter(props.data.bufferlist.list):map(get_second):filter(not_empty):totable()
+  local next_list = vim.iter(props.data.state):map(get_second):filter(not_empty):totable()
+  local current = vim.iter(current_list):join('\n')
+  local next = vim.iter(next_list):join('\n')
+
+  P {current, next}
+
+  local diff = {}
+  ---@param tag boolean
+  ---@param name string
+  local function guess(tag, name)
+    ---@type boolean?
+    local _tag = tag
+    if diff[name] == false and tag then
+      _tag = nil
+    end
+    if diff[name] and not tag then
+      _tag = nil
+    end
+    diff[name] = _tag
   end
 
-  props.data.bufferlist:move(props.data.bufferlist__cut, index)
-
-  props.data.bufferlist__cut = 0
-end
----@param props core.types.ui.model
----@param rel integer
-local cursor_go = function(props, rel)
-  local pos = api.nvim_win_get_cursor(props.internal.win)
-  pos[1] = pos[1] + rel
-  local lines = props.data.lines
-  if pos[1] < 1 or pos[1] > #lines then
-    return
-  end
-  api.nvim_win_set_cursor(props.internal.win, pos)
+  ---@diagnostic disable-next-line: missing-fields
+  vim.diff(current, next, {
+    on_hunk = function(start_cur, count_cur, start_next, count_next)
+      if count_next < count_cur then
+        local _start = start_cur
+        local _end = _start + count_cur - 1
+        vim.iter(current_list):slice(_start, _end):each(function(item)
+          guess(false, item)
+        end)
+      end
+      if start_cur == start_next and count_cur == count_next then
+        local _start = start_cur
+        local _end = _start + count_cur - 1
+        vim.iter(current_list):slice(_start, _end):each(function(item)
+          guess(false, item)
+        end)
+        vim.iter(next_list):slice(_start, _end):each(function(item)
+          guess(true, item)
+        end)
+      end
+      if count_next > count_cur and count_cur == 0 then
+        -- added items
+        vim.iter(next_list):slice(start_next, start_next+count_next-1):each(function(item)
+          guess(true, item)
+        end)
+      end
+    end,
+    ignore_whitespace = true,
+    ignore_whitespace_change = true,
+    ignore_whitespace_change_at_eol = true,
+    ignore_cr_at_eol = true,
+    ignore_blank_lines = true,
+  })
+  return diff
 end
 
 function model:update(msg)
@@ -98,12 +134,11 @@ function model:update(msg)
     fix_winheight = function()
       local win_config = self.internal.window.config
       local winheight = self.internal.window.height
-      local _height = self.internal.window.config.height
       local nr_lines = math.max(#self.data.lines, 1)
-      _height = nr_lines > _height and _height or nr_lines
+      local next = math.min(winheight, nr_lines)
 
-      win_config.row = math.floor((winheight - _height) / 2)
-      win_config.height = _height
+      win_config.row = math.floor((winheight - next) / 2)
+      win_config.height = next
 
       self.internal.window.config = win_config
       api.nvim_win_set_config(self.internal.win, self.internal.window.config)
@@ -111,62 +146,53 @@ function model:update(msg)
     show = function()
       self:send 'opts'
       self.data.bufferlist:update()
+      self:send 'reset_state'
       return true
     end,
     opts = function()
       api.nvim_set_option_value('number', true, { win = self.internal.win })
     end,
+    apply_state = function ()
+      -- apply state
+      self:send 'update_state'
+      self.data.bufferlist:update()
+      local diff = state_diff(self)
+
+      for name, tag in pairs(diff) do
+        if tag then
+          -- add item
+          vim.notify('add '..name, vim.log.levels.INFO)
+          self.data.bufferlist:append(name)
+        else
+          -- delete item
+          vim.notify('delete '..name, vim.log.levels.INFO)
+          self.data.bufferlist:remove(name)
+        end
+      end
+      self.data.bufferlist:update()
+    end,
+    update_state = function()
+      -- update state based on lines
+      self.data.state = vim.iter(self.data.lines):filter(not_empty):map(function(item)
+        if string.sub(item, 1, 1) ~= '/' then
+          item = string.format('%s/%s', vim.fn.getcwd(), item)
+        end
+        return item
+      end):map(function(item)
+        return { -1, item }
+      end):totable()
+    end,
     reset_state = function()
-      self.data.bufferlist__cut = 0
-    end,
-    check_delete = function()
-      if self.data.bufferlist__cut > 0 then
-        vim.notify(
-          string.format('delete cut item [%d]', self.data.bufferlist__cut),
-          vim.log.levels.DEBUG
-        )
-        self.data.bufferlist:delete(self.data.bufferlist__cut)
-        self:send 'reset_state'
-      end
-    end,
-    cut = function()
-      self:send 'check_delete'
-
-      local index = get_current_index(self)
-      if index == 0 then
-        return
-      end
-      self.data.bufferlist__cut = index
+      -- reset edits
+      self.data.state = self.data.bufferlist.list
       return true
     end,
-    paste = function()
-      if self.data.bufferlist__cut == 0 then
-        return
-      end
-      local new_index = get_current_index(self) + 1
-
-      paste(self, new_index)
-      return true
+    text_changed_insert = function ()
+      self:send 'text_changed'
     end,
-    go_down = function()
-      cursor_go(self, 1)
-    end,
-    go_up = function()
-      cursor_go(self, -1)
-    end,
-    move_down = function()
-      local cur = get_current_index(self)
-      self.data.bufferlist:move(cur, cur + 1)
-
-      self:send 'go_down'
-      return true
-    end,
-    move_up = function()
-      local cur = get_current_index(self)
-      self.data.bufferlist:move(cur, cur - 1)
-
-      self:send 'go_up'
-      return true
+    text_changed = function()
+      self.data.lines = api.nvim_buf_get_lines(self.internal.buf, 0, -1, false)
+      self:send 'fix_winheight'
     end,
     open = function()
       local index = get_current_index(self)
@@ -183,24 +209,14 @@ function model:update(msg)
         if not input or string.len(input) == 0 then
           return
         end
-        if string.sub(input, 1, 1) ~= '/' then
-          input = string.format('%s/%s', vim.fn.getcwd(), input)
-        end
-        self.data.bufferlist:append(input)
-        self:send 'view'
       end)
     end,
     close = function()
-      self:send 'check_delete'
+      self:send 'apply_state'
 
       _G.bufferlist = self.data.bufferlist
 
       vim.cmd.quit()
-    end,
-    prepend = function()
-      self:send 'paste'
-      self:send 'move_up'
-      return true
     end,
   }
 
@@ -212,6 +228,7 @@ end
 
 ui.open = function()
   model:open()
+  return model
 end
 
 return ui
