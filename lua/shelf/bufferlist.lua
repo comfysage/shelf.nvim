@@ -127,6 +127,13 @@ function Bufferlist:delete(index)
 end
 
 ---@class shelf.types.bufferlist
+---@field remove fun(self: shelf.types.bufferlist, name: string)
+function Bufferlist:remove(name)
+  local index = self:get_index({ name = name })
+  self:delete(index)
+end
+
+---@class shelf.types.bufferlist
 ---@field add fun(self: shelf.types.bufferlist, index: integer, name: string, buf?: integer)
 function Bufferlist:add(index, name, buf)
   if not index and not name then
