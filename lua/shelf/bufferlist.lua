@@ -87,7 +87,7 @@ end
 ---@field get_index fun(self: shelf.types.bufferlist, props: { buf?: integer, name?: string }): integer
 function Bufferlist:get_index(props)
   if not (props.name or props.buf) then
-    return 0
+    return -1
   end
 
   for i, v in ipairs(self.list) do
@@ -98,7 +98,7 @@ function Bufferlist:get_index(props)
     end
   end
 
-  return 0
+  return -1
 end
 
 ---@class shelf.types.bufferlist
