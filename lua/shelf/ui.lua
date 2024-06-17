@@ -8,7 +8,7 @@ local function not_empty(v)
   return vim.fn.empty(v) ~= 1
 end
 
-local model = require 'core.ui.internal.model'({
+local model = require 'yosu.model'({
   bufferlist = require 'shelf.bufferlist',
   -- list as drawn lines
   lines = {},

@@ -9,7 +9,7 @@ similar to [harpoon](https://github.com/ThePrimeagen/harpoon/tree/harpoon2).
 ## :lock: requirements
 
 - Neovim `>= 0.9.0` (needs to be built with LuaJIT)
-- [chaivim](https://github.com/comfysage/chaivim)
+- [yosu.nvim](https://github.com/comfysage/yosu.nvim)
 
 ## :package: installation
 
@@ -17,6 +17,7 @@ shelf can be installed by adding *this* to your `lua/plugins/init.lua`.
 ```lua
 {
     'comfysage/shelf.nvim',
+    dependencies = {'comfysage/yosu.nvim'},
     opts = {},
     config = function(_, opts)
         require 'shelf'.setup(opts)
