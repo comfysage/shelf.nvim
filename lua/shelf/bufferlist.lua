@@ -28,15 +28,15 @@ function Bufferlist:register(list)
   ---@type table<string, boolean>
   local exists = {}
 
-  for _, item in ipairs(self.list) do
+  vim.iter(ipairs(self.list)):each(function(_, item)
     exists[item[2]] = true
-  end
+  end)
 
-  for _, name in ipairs(list) do
+  vim.iter(ipairs(list)):each(function(_, name)
     if not exists[name] then
       self:append(name, vim.fn.bufnr(name))
     end
-  end
+  end)
 end
 
 ---@class shelf.types.bufferlist
