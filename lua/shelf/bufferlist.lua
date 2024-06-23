@@ -42,18 +42,15 @@ end
 ---@class shelf.types.bufferlist
 ---@field register_buffers fun(self: shelf.types.bufferlist)
 function Bufferlist:register_buffers()
-  local buflist = vim.api.nvim_list_bufs()
-
-  buflist = vim.tbl_filter(function(bufnr)
+  local buflist = vim.iter(vim.api.nvim_list_bufs()):filter(function(bufnr)
     if vim.bo[bufnr].buftype ~= '' then
       return false
     end
     return vim.api.nvim_buf_is_loaded(bufnr)
       and vim.api.nvim_buf_is_valid(bufnr)
-  end, buflist)
-  buflist = vim.tbl_map(function(bufnr)
+  end):map(function(bufnr)
     return vim.api.nvim_buf_get_name(bufnr)
-  end, buflist)
+  end):totable()
 
   self:register(buflist)
 end
