@@ -61,19 +61,18 @@ end
 ---@class shelf.types.bufferlist
 ---@field fix fun(self: shelf.types.bufferlist)
 function Bufferlist:fix()
-  self.list = vim.tbl_filter(function(item)
+  self.list = vim.iter(self.list):filter(function(item)
     -- check for connected items
-    if item[1] > -1 then
+    if item[1] >= 0 then
       -- check for broken connection
       if 1 ~= vim.fn.buflisted(item[1]) then
         return false
       end
     end
     return true
-  end, self.list)
-  self.list = vim.tbl_map(function(item)
+  end):map(function(item)
     return { vim.fn.bufnr(item[2]), item[2] }
-  end, self.list)
+  end):totable()
 end
 
 ---@class shelf.types.bufferlist
