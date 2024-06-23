@@ -65,6 +65,9 @@ function Bufferlist:fix()
       if 1 ~= vim.fn.buflisted(item[1]) then
         return false
       end
+      if vim.api.nvim_get_option_value('buftype', {buf=item[1]}) == 'nofile' then
+        return false
+      end
     end
     return true
   end):map(function(item)
