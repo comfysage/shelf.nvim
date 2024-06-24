@@ -88,3 +88,10 @@ below is the default shelf configuration.
     }
 }
 ```
+
+## credits
+
+the project was mainly inspired by
+[harpoon](https://github.com/ThePrimeagen/harpoon/tree/harpoon2) and the keymap
+behavior was inspired by
+[mini.files](https://github.com/echasnovski/mini.files)
