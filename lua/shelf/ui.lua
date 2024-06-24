@@ -153,7 +153,7 @@ function model:update(msg)
     apply_state = function ()
       -- apply state
       self:send 'update_state'
-      self.data.bufferlist:update()
+      self.data.bufferlist.list = self.data.state
       local diff = state_diff(self)
 
       for name, tag in pairs(diff) do
