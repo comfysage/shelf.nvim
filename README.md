@@ -4,7 +4,20 @@
 
 ## :sparkles: Features
 
-similar to [harpoon](https://github.com/ThePrimeagen/harpoon/tree/harpoon2).
+
+open the bufferlist:
+
+```lua
+require('shelf.ui').open()
+```
+
+make changes by editing the buffer, apply them with <kbd>=</kbd> or quit
+without saving changes with <kbd>esc</kbd>.
+the currently highlighted list item can be opened with <kbd>enter</kbd> or:
+
+```lua
+bufferlist:open(1) -- open item at index 1
+```
 
 ## :lock: requirements
 
