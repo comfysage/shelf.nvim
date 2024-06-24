@@ -8,7 +8,7 @@ similar to [harpoon](https://github.com/ThePrimeagen/harpoon/tree/harpoon2).
 
 ## :lock: requirements
 
-- Neovim `>= 0.9.0` (needs to be built with LuaJIT)
+- Neovim `>= 0.10.0`
 - [yosu.nvim](https://github.com/comfysage/yosu.nvim)
 
 ## :package: installation
