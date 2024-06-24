@@ -1,3 +1,9 @@
+---@mod shelf
+
+if vim.fn.has("nvim-0.10.0") ~= 1 then
+    error("shelf requires Neovim >= 0.10.0")
+end
+
 require 'shelf.bufferlist'
 
 local Shelf = {}
