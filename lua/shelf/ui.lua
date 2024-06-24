@@ -75,8 +75,6 @@ local function state_diff(props)
   local current = vim.iter(current_list):join('\n')
   local next = vim.iter(next_list):join('\n')
 
-  P {current, next}
-
   local diff = {}
   ---@param tag boolean
   ---@param name string
