@@ -2,8 +2,11 @@
 
 :books: a bookmarks manager for chaivim.
 
+<!-- TODO: add vhs tape -->
+
 ## :sparkles: Features
 
+<!-- TODO: add detailed feature description -->
 
 open the bufferlist:
 
@@ -26,7 +29,8 @@ bufferlist:open(1) -- open item at index 1
 
 ## :package: installation
 
-shelf can be installed by adding *this* to your `lua/plugins/init.lua`.
+shelf can be installed by adding _this_ to your `lua/plugins/init.lua`.
+
 ```lua
 {
     'comfysage/shelf.nvim',
@@ -49,6 +53,7 @@ shelf can be installed by adding *this* to your `lua/plugins/init.lua`.
 ## :gear: configuration
 
 below is the default shelf configuration.
+
 ```lua
 {
     opts = {
