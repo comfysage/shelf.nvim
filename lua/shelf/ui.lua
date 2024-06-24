@@ -78,7 +78,6 @@ local function has_changes(props)
   local next_list = vim.iter(props.data.lines):filter(not_empty):totable()
   local current = vim.iter(current_list):join('\n')
   local next = vim.iter(next_list):join('\n')
-  P {current, next}
 
   ---@diagnostic disable-next-line: missing-fields
   local diff = vim.diff(current, next, {
@@ -171,7 +170,6 @@ function model:update(msg)
     end,
     fix_modified_hl = function()
       local is_changed = has_changes(self)
-      vim.notify(('has_changes:%s'):format(is_changed), vim.log.levels.WARN)
       if is_changed then
         vim.wo[self.internal.win].winhl = 'FloatBorder:DiagnosticFloatingWarn'
       else
@@ -196,11 +194,11 @@ function model:update(msg)
       for name, tag in pairs(diff) do
         if tag then
           -- add item
-          vim.notify('add '..name, vim.log.levels.INFO)
+          vim.notify('add buffer '..name, vim.log.levels.DEBUG)
           self.data.bufferlist:append(name)
         else
           -- delete item
-          vim.notify('delete '..name, vim.log.levels.INFO)
+          vim.notify('delete buffer '..name, vim.log.levels.DEBUG)
           self.data.bufferlist:remove(name)
         end
       end
