@@ -58,28 +58,19 @@ below is the default shelf configuration.
 {
     opts = {
         -- cache file where bufferlists are saved
-        cache_file = vim.fn.stdpath 'data' .. '/shelf.cache.json',
+        cache_file = vim.fn.stdpath 'state' .. '/shelf.list.json',
         -- mappings for shelf ui
         mappings = {
-            -- move up and down the list
-            go_down = 'j',
-            go_up = 'k',
             -- close the window
             close = 'q',
             -- close without applying changes
             quit = '<esc>',
             -- open current item
             open = '<cr>',
-            -- cut item (so it can be pasted elsewhere in the list)
-            cut = 'dd',
-            paste = 'p',
-            prepend = 'P',
-            -- move current item one index down
-            move_down = 'J',
-            -- move current item one index up
-            move_up = 'K',
-            -- add a new item to the bufferlist
-            create = 'a',
+            -- apply buffer edits
+            apply = '=',
+            -- reset buffer edits
+            reset = '<bs>',
         },
         ui = {
             size = {
