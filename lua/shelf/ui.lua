@@ -66,6 +66,34 @@ local function get_current_index(props)
 end
 
 ---@param props core.types.ui.model
+---@return boolean
+local function has_changes(props)
+  local function get_second(array)
+    return array[2]
+  end
+  local current_list = vim.iter(props.data.bufferlist.list):map(get_second):filter(not_empty):map(function(path)
+    local repl = string.gsub(path, vim.fn.getcwd() .. '/', '')
+    return repl
+  end):totable()
+  local next_list = vim.iter(props.data.lines):filter(not_empty):totable()
+  local current = vim.iter(current_list):join('\n')
+  local next = vim.iter(next_list):join('\n')
+  P {current, next}
+
+  ---@diagnostic disable-next-line: missing-fields
+  local diff = vim.diff(current, next, {
+    result_type = 'indices',
+    ignore_whitespace = true,
+    ignore_whitespace_change = true,
+    ignore_whitespace_change_at_eol = true,
+    ignore_cr_at_eol = true,
+    ignore_blank_lines = true,
+  })
+
+  return #diff > 0
+end
+
+---@param props core.types.ui.model
 local function state_diff(props)
   local function get_second(array)
     return array[2]
@@ -141,6 +169,15 @@ function model:update(msg)
       self.internal.window.config = win_config
       api.nvim_win_set_config(self.internal.win, self.internal.window.config)
     end,
+    fix_modified_hl = function()
+      local is_changed = has_changes(self)
+      vim.notify(('has_changes:%s'):format(is_changed), vim.log.levels.WARN)
+      if is_changed then
+        vim.wo[self.internal.win].winhl = 'FloatBorder:DiagnosticFloatingWarn'
+      else
+        vim.wo[self.internal.win].winhl = 'FloatBorder:FloatBorder'
+      end
+    end,
     show = function()
       self:send 'opts'
       self.data.bufferlist:update()
@@ -191,6 +228,7 @@ function model:update(msg)
     text_changed = function()
       self.data.lines = api.nvim_buf_get_lines(self.internal.buf, 0, -1, false)
       self:send 'fix_winheight'
+      self:send 'fix_modified_hl'
     end,
     open = function()
       local index = get_current_index(self)
