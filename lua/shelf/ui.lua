@@ -208,6 +208,7 @@ function model:update(msg)
         end
       end
       self.data.bufferlist:update()
+      self:send 'fix_modified_hl'
     end,
     update_state = function()
       -- update state based on lines
