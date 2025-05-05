@@ -8,6 +8,11 @@ local function not_empty(v)
   return vim.fn.empty(v) ~= 1
 end
 
+local has_yosu, _ = pcall(require, 'yosu')
+if not has_yosu then
+  return error('shelf requires yosu.nvim')
+end
+
 local model = require 'yosu.model'({
   bufferlist = require 'shelf.bufferlist',
   -- list as drawn lines
