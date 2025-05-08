@@ -1,3 +1,5 @@
+local config = require('shelf.config')
+
 ---@class shelf.types.data.value
 ---@field list table<string, (string[])>
 
@@ -25,7 +27,7 @@ end
 ---@class shelf.types.data
 ---@field read_data fun(self: shelf.types.data): boolean, shelf.types.data.value?
 function Data:read_data()
-  local fh = io.open(require('shelf.config').cache_file, 'r')
+  local fh = io.open(config.get().cache_file, 'r')
   if not fh then
     return false, nil
   end
@@ -89,7 +91,7 @@ end
 function Data:write()
   self:sync_list()
   self:fill()
-  local fh = io.open(require('shelf.config').cache_file, 'w+')
+  local fh = io.open(config.get().cache_file, 'w+')
   if not fh then
     return
   end

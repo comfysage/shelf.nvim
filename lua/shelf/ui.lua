@@ -24,8 +24,8 @@ local model = require 'yosu.model'({
   persistent = true,
   text_edit = true,
   size = {
-    width = config.ui.size.width,
-    height = config.ui.size.height,
+    width = config.get().ui.size.width,
+    height = config.get().ui.size.height,
   },
 })
 
@@ -38,12 +38,14 @@ function model:init()
     end
   end, {})
 
+  local cfg = config.get()
+
   self:add_mapping('n', 'q', 'close')
-  self:add_mapping('n', config.mappings.close, 'close')
-  self:add_mapping('n', config.mappings.quit, 'quit')
-  self:add_mapping('n', config.mappings.open, 'open')
-  self:add_mapping('n', config.mappings.apply, 'apply_state')
-  self:add_mapping('n', config.mappings.reset, 'reset_state')
+  self:add_mapping('n', cfg.mappings.close, 'close')
+  self:add_mapping('n', cfg.mappings.quit, 'quit')
+  self:add_mapping('n', cfg.mappings.open, 'open')
+  self:add_mapping('n', cfg.mappings.apply, 'apply_state')
+  self:add_mapping('n', cfg.mappings.reset, 'reset_state')
 
   self:send 'opts'
 end

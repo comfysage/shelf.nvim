@@ -1,5 +1,7 @@
 ---@mod shelf
 
+local config = require('shelf.config')
+
 if vim.fn.has("nvim-0.10.0") ~= 1 then
     error("shelf requires Neovim >= 0.10.0")
 end
@@ -27,8 +29,10 @@ function Shelf:new()
   return shelf
 end
 
-Shelf.setup = function(config)
-  require('shelf.config'):merge(config or {})
+---@param cfg? shelf.config
+Shelf.setup = function(cfg)
+  cfg = cfg or {}
+  config.set(config.override(cfg))
   package.loaded['shelf'] = Shelf:new()
 end
 

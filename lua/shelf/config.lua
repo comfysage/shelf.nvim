@@ -1,49 +1,80 @@
----@class shelf.types.config
+---@class shelf.config
 ---@field cache_file string
 ---@field mappings table<string, string>
 ---@field ui { size: table<'width'|'height', number> }
-local Config = {}
-Config.__index = Config
 
----@class shelf.types.config
----@field new fun(self: shelf.types.config): shelf.types.config
-function Config:new()
-  local config = setmetatable({
-    -- cache file where bufferlists are saved
-    cache_file = vim.fn.stdpath 'state' .. '/shelf.list.json',
-    -- mappings for shelf ui
-    mappings = {
-      -- close the window
-      close = 'q',
-      -- close without applying changes
-      quit = '<esc>',
-      -- open current item
-      open = '<cr>',
-      -- apply buffer edits
-      apply = '=',
-      -- reset buffer edits
-      reset = '<bs>',
-    },
-    ui = {
-      size = {
-        -- size fields can be either an absolute integer size or a number between 0 and 1
-        -- window is 90 characters wide
-        width = 90,
-        -- max window height is 90% of editor height
-        height = 0.9,
-      },
-    },
-  }, self)
+local M = {}
 
-  return config
+M.default = {
+  -- cache file where bufferlists are saved
+  cache_file = vim.fn.stdpath 'state' .. '/shelf.list.json',
+  -- mappings for shelf ui
+  mappings = {
+    -- close the window
+    close = 'q',
+    -- close without applying changes
+    quit = '<esc>',
+    -- open current item
+    open = '<cr>',
+    -- apply buffer edits
+    apply = '=',
+    -- reset buffer edits
+    reset = '<bs>',
+  },
+  ui = {
+    size = {
+      -- size fields can be either an absolute integer size or a number between 0 and 1
+      -- window is 90 characters wide
+      width = 90,
+      -- max window height is 90% of editor height
+      height = 0.9,
+    },
+  },
+}
+
+---@type shelf.config
+M.config = {}
+
+---@return shelf.config
+function M.get()
+  return vim.tbl_deep_extend("force", M.default, M.config)
 end
 
----@class shelf.types.config
----@field merge fun(self: shelf.types.config, cfg: shelf.types.config)
-function Config:merge(cfg)
-  self = vim.tbl_deep_extend('force', self, cfg or {})
+---@param cfg shelf.config
+---@return shelf.config
+function M.override(cfg)
+  return vim.tbl_deep_extend("force", M.default, cfg)
 end
 
-_G.shelf_config = _G.shelf_config or Config:new()
+---@param cfg shelf.config
+function M.set(cfg)
+  M.config = cfg
+end
 
-return _G.shelf_config
+local function validate_enum(enum)
+  return function(value)
+    return vim.iter(ipairs(enum)):any(function(_, v)
+      return v == value
+    end)
+  end
+end
+
+function M.validate()
+  vim.validate('cfg', M.get(), function(cfg)
+    vim.validate('cfg.enable', cfg.enable, 'boolean')
+    vim.validate('cfg.delay', cfg.delay, 'number')
+    vim.validate('cfg.ui', cfg.ui, function(v)
+      vim.validate('cfg.ui.compact', v.compact, 'boolean')
+      vim.validate('cfg.ui.size', v.size, function(v)
+        vim.validate('cfg.ui.size.width', v.width, 'number')
+        vim.validate('cfg.ui.size.height', v.height, 'number')
+        return true
+      end)
+      vim.validate('cfg.ui.orientation', v.orientation, validate_enum({'horizontal', 'vertical'}))
+      return true
+    end)
+    return true
+  end)
+end
+
+return M
