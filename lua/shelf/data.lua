@@ -48,15 +48,15 @@ function Data:_read()
   local cwd = vim.fn.getcwd()
   local ok, data = self:read_data()
   if ok and data and data.list[cwd] then
-    local _added = {}
-    for _, name in ipairs(self.data.list[cwd]) do
-      _added[name] = true
-    end
-    for _, name in ipairs(data.list[cwd]) do
+    local _added = vim.iter(ipairs(self.data.list[cwd])):fold({}, function(acc, _, name)
+      acc[name] = true
+      return acc
+    end)
+    vim.iter(ipairs(data.list[cwd])):each(function(_, name)
       if not _added[name] then
-        self.data.list[cwd][#self.data.list[cwd] + 1] = name
+        table.insert(self.data.list[cwd], name)
       end
-    end
+    end)
   end
 
   return ok
@@ -103,11 +103,13 @@ end
 ---@field clean fun(self: shelf.types.data)
 function Data:clean()
   local cwd = vim.fn.getcwd()
-  for i, name in ipairs(self.data.list[cwd]) do
+  self.data.list[cwd] = vim.iter(ipairs(self.data.list[cwd])):fold({}, function(lst, _, name)
     if string.len(name) == 0 then
-      table.remove(self.data.list[cwd], i)
+      return lst
     end
-  end
+    table.insert(lst, name)
+    return lst
+  end)
 end
 
 --- configure global data

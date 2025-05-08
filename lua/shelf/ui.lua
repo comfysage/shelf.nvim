@@ -196,7 +196,7 @@ function model:update(msg)
       self.data.bufferlist.list = self.data.state
       local diff = state_diff(self)
 
-      for name, tag in pairs(diff) do
+      vim.iter(pairs(diff)):each(function(name, tag)
         if tag then
           -- add item
           vim.notify('add buffer '..name, vim.log.levels.DEBUG)
@@ -206,7 +206,7 @@ function model:update(msg)
           vim.notify('delete buffer '..name, vim.log.levels.DEBUG)
           self.data.bufferlist:remove(name)
         end
-      end
+      end)
       self.data.bufferlist:update()
       self:send 'fix_modified_hl'
     end,

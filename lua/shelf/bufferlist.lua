@@ -25,11 +25,11 @@ end
 ---@class shelf.types.bufferlist
 ---@field register fun(self: shelf.types.bufferlist, list: string[])
 function Bufferlist:register(list)
-  ---@type table<string, boolean>
-  local exists = {}
 
-  vim.iter(ipairs(self.list)):each(function(_, item)
-    exists[item[2]] = true
+  ---@type table<string, boolean>
+  local exists = vim.iter(ipairs(self.list)):fold({}, function(acc, _, item)
+    acc[item[2]] = true
+    return acc
   end)
 
   vim.iter(ipairs(list)):each(function(_, name)
@@ -89,12 +89,12 @@ function Bufferlist:get_index(props)
     return -1
   end
 
-  for i, v in ipairs(self.list) do
-    if props.name and v[2] == props.name then
-      return i
-    elseif props.buf and props.buf ~= -1 and v[1] == props.buf then
-      return i
-    end
+  local i, _ = vim.iter(ipairs(self.list)):find(function(_, v)
+    return (props.name and v[2] == props.name)
+      or (props.buf and props.buf ~= -1 and v[1] == props.buf)
+  end)
+  if i then
+    return i
   end
 
   return -1
