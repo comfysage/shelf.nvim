@@ -132,9 +132,9 @@ end
 function Data:sync_list()
   local cwd = vim.fn.getcwd()
   bufferlist:update()
-  self.data.list[cwd] = vim.tbl_map(function(item)
+  self.data.list[cwd] = vim.iter(ipairs(bufferlist:get())):map(function(_, item)
     return item[2]
-  end, bufferlist)
+  end):totable()
 end
 
 return Data:new()

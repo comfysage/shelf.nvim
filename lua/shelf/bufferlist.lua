@@ -23,6 +23,12 @@ function Bufferlist:new()
 end
 
 ---@class shelf.types.bufferlist
+---@field get fun(self: shelf.types.bufferlist): shelf.types.bufferlist.list
+function Bufferlist:get()
+  return self.list
+end
+
+---@class shelf.types.bufferlist
 ---@field register fun(self: shelf.types.bufferlist, list: string[])
 function Bufferlist:register(list)
 
