@@ -1,3 +1,4 @@
+local bufferlist = require('shelf.bufferlist')
 local config = require('shelf.config')
 
 ---@class shelf.types.data.value
@@ -120,7 +121,7 @@ end
 ---@field register_list fun(self: shelf.types.data)
 function Data:register_list()
   local cwd = vim.fn.getcwd()
-  require('shelf'):list():register(self.data.list[cwd])
+  bufferlist:register(self.data.list[cwd])
 end
 
 --- configure local data
@@ -130,10 +131,10 @@ end
 ---@field sync_list fun(self: shelf.types.data)
 function Data:sync_list()
   local cwd = vim.fn.getcwd()
-  require('shelf'):list():update()
+  bufferlist:update()
   self.data.list[cwd] = vim.tbl_map(function(item)
     return item[2]
-  end, require('shelf'):list())
+  end, bufferlist)
 end
 
 return Data:new()
