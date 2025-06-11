@@ -1,5 +1,6 @@
 ---@class shelf.config
 ---@field cache_file string
+---@field restore_buffers boolean
 ---@field mappings table<string, string>
 ---@field ui { size: table<'width'|'height', number> }
 
@@ -8,6 +9,8 @@ local M = {}
 M.default = {
   -- cache file where bufferlists are saved
   cache_file = vim.fn.stdpath 'state' .. '/shelf.list.json',
+  -- restore buffers
+  restore_buffers = true,
   -- mappings for shelf ui
   mappings = {
     -- close the window
