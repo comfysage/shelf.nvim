@@ -25,9 +25,8 @@ function Data:new()
   return data
 end
 
----@class shelf.types.data
----@field read_data fun(self: shelf.types.data): boolean, shelf.types.data.value?
-function Data:read_data()
+---@return boolean, shelf.types.data.value?
+local function read_data()
   local fh = io.open(config.get().cache_file, 'r')
   if not fh then
     return false, nil
@@ -49,7 +48,7 @@ end
 ---@field _read fun(self: shelf.types.data): boolean
 function Data:_read()
   local cwd = vim.fn.getcwd()
-  local ok, data = self:read_data()
+  local ok, data = read_data()
   if ok and data and data.list[cwd] then
     local _added = vim.iter(ipairs(self.data.list[cwd])):fold({}, function(acc, _, name)
       acc[name] = true
@@ -79,7 +78,7 @@ end
 ---@class shelf.types.data
 ---@field fill fun(self: shelf.types.data): boolean
 function Data:fill()
-  local ok, data = self:read_data()
+  local ok, data = read_data()
   if ok and data then
     self.data = vim.tbl_deep_extend('keep', self.data, data)
   end
