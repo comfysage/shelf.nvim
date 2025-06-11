@@ -13,16 +13,18 @@ vim.g.loaded_shelf = true
 
 local group = vim.api.nvim_create_augroup('shelf', { clear = true })
 
-vim.api.nvim_create_autocmd('VimEnter', {
-  group = group,
-  once = true,
-  callback = function(_)
-    require('shelf.data'):read()
-  end,
-})
+if not vim.v.vim_did_enter then
+  vim.api.nvim_create_autocmd('VimEnter', {
+    group = group,
+    callback = function(_)
+      require('shelf.data'):read()
+    end,
+  })
+else
+  require('shelf.data'):read()
+end
 vim.api.nvim_create_autocmd('VimLeavePre', {
   group = group,
-  once = true,
   callback = function(_)
     require('shelf.data'):write()
   end,
