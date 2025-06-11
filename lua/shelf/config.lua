@@ -36,6 +36,7 @@ M.default = {
 }
 
 ---@type shelf.config
+---@diagnostic disable-next-line: missing-fields
 M.config = {}
 
 ---@return shelf.config
@@ -54,26 +55,22 @@ function M.set(cfg)
   M.config = cfg
 end
 
-local function validate_enum(enum)
-  return function(value)
-    return vim.iter(ipairs(enum)):any(function(_, v)
-      return v == value
-    end)
-  end
-end
-
 function M.validate()
   vim.validate('cfg', M.get(), function(cfg)
-    vim.validate('cfg.enable', cfg.enable, 'boolean')
-    vim.validate('cfg.delay', cfg.delay, 'number')
-    vim.validate('cfg.ui', cfg.ui, function(v)
-      vim.validate('cfg.ui.compact', v.compact, 'boolean')
-      vim.validate('cfg.ui.size', v.size, function(v)
-        vim.validate('cfg.ui.size.width', v.width, 'number')
-        vim.validate('cfg.ui.size.height', v.height, 'number')
+    vim.validate('cfg.cache_file', cfg.cache_file, 'string')
+    vim.validate('cfg.restore_buffers', cfg.restore_buffers, 'boolean')
+    vim.validate('cfg.mappings', cfg.mappings, function(v)
+      return vim.iter(pairs(v)):all(function(n, k)
+        vim.validate('cfg.mappings.' .. n, k, 'string')
         return true
       end)
-      vim.validate('cfg.ui.orientation', v.orientation, validate_enum({'horizontal', 'vertical'}))
+    end)
+    vim.validate('cfg.ui', cfg.ui, function(ui)
+      vim.validate('cfg.ui.size', ui.size, function(size)
+        vim.validate('cfg.ui.size.width', size.width, 'number')
+        vim.validate('cfg.ui.size.height', size.height, 'number')
+        return true
+      end)
       return true
     end)
     return true

@@ -8,6 +8,7 @@ local M = {}
 M.setup = function(cfg)
   cfg = cfg or {}
   config.set(config.override(cfg))
+  config.validate()
 end
 
 return M
