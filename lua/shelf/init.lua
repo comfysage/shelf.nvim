@@ -1,6 +1,6 @@
 ---@mod shelf
 
-local config = require('shelf.config')
+local config = require 'shelf.config'
 
 local M = {}
 

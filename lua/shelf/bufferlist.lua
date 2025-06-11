@@ -31,7 +31,6 @@ end
 ---@class shelf.types.bufferlist
 ---@field register fun(self: shelf.types.bufferlist, list: string[])
 function Bufferlist:register(list)
-
   ---@type table<string, boolean>
   local exists = vim.iter(ipairs(self.list)):fold({}, function(acc, _, item)
     acc[item[2]] = true
@@ -48,15 +47,19 @@ end
 ---@class shelf.types.bufferlist
 ---@field register_buffers fun(self: shelf.types.bufferlist)
 function Bufferlist:register_buffers()
-  local buflist = vim.iter(vim.api.nvim_list_bufs()):filter(function(bufnr)
-    if vim.bo[bufnr].buftype ~= '' then
-      return false
-    end
-    return vim.api.nvim_buf_is_loaded(bufnr)
-      and vim.api.nvim_buf_is_valid(bufnr)
-  end):map(function(bufnr)
-    return vim.api.nvim_buf_get_name(bufnr)
-  end):totable()
+  local buflist = vim
+    .iter(vim.api.nvim_list_bufs())
+    :filter(function(bufnr)
+      if vim.bo[bufnr].buftype ~= '' then
+        return false
+      end
+      return vim.api.nvim_buf_is_loaded(bufnr)
+        and vim.api.nvim_buf_is_valid(bufnr)
+    end)
+    :map(function(bufnr)
+      return vim.api.nvim_buf_get_name(bufnr)
+    end)
+    :totable()
 
   self:register(buflist)
 end
@@ -64,47 +67,56 @@ end
 ---@class shelf.types.bufferlist
 ---@field clean fun(self: shelf.types.bufferlist)
 function Bufferlist:clean()
-  self.list = vim.iter(ipairs(self.list)):map(function(_, item)
-    local bufnr = item[1]
-    -- check for connected items
-    if bufnr >= 0 then
-      -- check for broken connection
-      if 1 ~= vim.fn.buflisted(item[1]) then
+  self.list = vim
+    .iter(ipairs(self.list))
+    :map(function(_, item)
+      local bufnr = item[1]
+      -- check for connected items
+      if bufnr >= 0 then
+        -- check for broken connection
+        if 1 ~= vim.fn.buflisted(item[1]) then
+          return
+        end
+        if
+          vim.api.nvim_get_option_value('buftype', { buf = item[1] })
+          == 'nofile'
+        then
+          return
+        end
+      end
+      local fname = item[2]
+      if #fname == 0 then
         return
       end
-      if vim.api.nvim_get_option_value('buftype', {buf=item[1]}) == 'nofile' then
+      if fname:sub(1, 5) == '/tmp/' then
         return
       end
-    end
-    local fname = item[2]
-    if #fname == 0 then
-      return
-    end
-    if fname:sub(1, 5) == '/tmp/' then
-      return
-    end
-    return item
-  end):totable()
+      return item
+    end)
+    :totable()
 end
 
 ---@class shelf.types.bufferlist
 ---@field fix fun(self: shelf.types.bufferlist)
 function Bufferlist:fix()
   self:clean()
-  self.list = vim.iter(ipairs(self.list)):map(function(_, item)
-    local bufnr = item[1]
-    local fname = item[2]
+  self.list = vim
+    .iter(ipairs(self.list))
+    :map(function(_, item)
+      local bufnr = item[1]
+      local fname = item[2]
 
-    if bufnr < 0 then
-      if require('shelf.config').get().restore_buffers then
-        bufnr = utils.create_buf(fname)
+      if bufnr < 0 then
+        if require('shelf.config').get().restore_buffers then
+          bufnr = utils.create_buf(fname)
+        end
+      else
+        bufnr = vim.fn.bufnr(fname)
       end
-    else
-      bufnr = vim.fn.bufnr(fname)
-    end
 
-    return { bufnr, fname }
-  end):totable()
+      return { bufnr, fname }
+    end)
+    :totable()
 end
 
 ---@class shelf.types.bufferlist
@@ -160,7 +172,7 @@ end
 ---@class shelf.types.bufferlist
 ---@field remove fun(self: shelf.types.bufferlist, name: string)
 function Bufferlist:remove(name)
-  local index = self:get_index({ name = name })
+  local index = self:get_index { name = name }
   self:delete(index)
 end
 

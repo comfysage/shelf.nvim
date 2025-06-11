@@ -10,11 +10,11 @@ end
 
 local has_yosu, _ = pcall(require, 'yosu')
 if not has_yosu then
-  return error('shelf requires yosu.nvim')
+  return error 'shelf requires yosu.nvim'
 end
 
 local model = require 'yosu.model'({
-  bufferlist = require 'shelf.bufferlist'.bufferlist,
+  bufferlist = require('shelf.bufferlist').bufferlist,
   -- list as drawn lines
   lines = {},
   -- list as edited state
@@ -53,7 +53,7 @@ end
 local function draw(v)
   local name = v[2]
   local line =
-  string.gsub(name, string.format('^%s', vim.fn.getcwd() .. '/'), '')
+    string.gsub(name, string.format('^%s', vim.fn.getcwd() .. '/'), '')
 
   return line
 end
@@ -78,13 +78,18 @@ local function has_changes(props)
   local function get_second(array)
     return array[2]
   end
-  local current_list = vim.iter(props.data.bufferlist.list):map(get_second):filter(not_empty):map(function(path)
-    local repl = string.gsub(path, vim.fn.getcwd() .. '/', '')
-    return repl
-  end):totable()
+  local current_list = vim
+    .iter(props.data.bufferlist.list)
+    :map(get_second)
+    :filter(not_empty)
+    :map(function(path)
+      local repl = string.gsub(path, vim.fn.getcwd() .. '/', '')
+      return repl
+    end)
+    :totable()
   local next_list = vim.iter(props.data.lines):filter(not_empty):totable()
-  local current = vim.iter(current_list):join('\n')
-  local next = vim.iter(next_list):join('\n')
+  local current = vim.iter(current_list):join '\n'
+  local next = vim.iter(next_list):join '\n'
 
   ---@diagnostic disable-next-line: missing-fields
   local diff = vim.diff(current, next, {
@@ -104,10 +109,15 @@ local function state_diff(props)
   local function get_second(array)
     return array[2]
   end
-  local current_list = vim.iter(props.data.bufferlist.list):map(get_second):filter(not_empty):totable()
-  local next_list = vim.iter(props.data.state):map(get_second):filter(not_empty):totable()
-  local current = vim.iter(current_list):join('\n')
-  local next = vim.iter(next_list):join('\n')
+  local current_list = vim
+    .iter(props.data.bufferlist.list)
+    :map(get_second)
+    :filter(not_empty)
+    :totable()
+  local next_list =
+    vim.iter(props.data.state):map(get_second):filter(not_empty):totable()
+  local current = vim.iter(current_list):join '\n'
+  local next = vim.iter(next_list):join '\n'
 
   local diff = {}
   ---@param tag boolean
@@ -146,9 +156,12 @@ local function state_diff(props)
       end
       if count_next > count_cur and count_cur == 0 then
         -- added items
-        vim.iter(next_list):slice(start_next, start_next+count_next-1):each(function(item)
-          guess(true, item)
-        end)
+        vim
+          .iter(next_list)
+          :slice(start_next, start_next + count_next - 1)
+          :each(function(item)
+            guess(true, item)
+          end)
       end
     end,
     ignore_whitespace = true,
@@ -192,7 +205,7 @@ function model:update(msg)
     opts = function()
       api.nvim_set_option_value('number', true, { win = self.internal.win })
     end,
-    apply_state = function ()
+    apply_state = function()
       -- apply state
       self:send 'update_state'
       self.data.bufferlist.list = self.data.state
@@ -201,11 +214,11 @@ function model:update(msg)
       vim.iter(pairs(diff)):each(function(name, tag)
         if tag then
           -- add item
-          vim.notify('add buffer '..name, vim.log.levels.DEBUG)
+          vim.notify('add buffer ' .. name, vim.log.levels.DEBUG)
           self.data.bufferlist:append(name)
         else
           -- delete item
-          vim.notify('delete buffer '..name, vim.log.levels.DEBUG)
+          vim.notify('delete buffer ' .. name, vim.log.levels.DEBUG)
           self.data.bufferlist:remove(name)
         end
       end)
@@ -214,21 +227,26 @@ function model:update(msg)
     end,
     update_state = function()
       -- update state based on lines
-      self.data.state = vim.iter(self.data.lines):filter(not_empty):map(function(item)
-        if string.sub(item, 1, 1) ~= '/' then
-          item = string.format('%s/%s', vim.fn.getcwd(), item)
-        end
-        return item
-      end):map(function(item)
-        return { -1, item }
-      end):totable()
+      self.data.state = vim
+        .iter(self.data.lines)
+        :filter(not_empty)
+        :map(function(item)
+          if string.sub(item, 1, 1) ~= '/' then
+            item = string.format('%s/%s', vim.fn.getcwd(), item)
+          end
+          return item
+        end)
+        :map(function(item)
+          return { -1, item }
+        end)
+        :totable()
     end,
     reset_state = function()
       -- reset edits
       self.data.state = self.data.bufferlist.list
       return true
     end,
-    text_changed_insert = function ()
+    text_changed_insert = function()
       self:send 'text_changed'
     end,
     text_changed = function()

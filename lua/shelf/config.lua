@@ -41,13 +41,13 @@ M.config = {}
 
 ---@return shelf.config
 function M.get()
-  return vim.tbl_deep_extend("force", M.default, M.config)
+  return vim.tbl_deep_extend('force', M.default, M.config)
 end
 
 ---@param cfg shelf.config
 ---@return shelf.config
 function M.override(cfg)
-  return vim.tbl_deep_extend("force", M.default, cfg)
+  return vim.tbl_deep_extend('force', M.default, cfg)
 end
 
 ---@param cfg shelf.config
