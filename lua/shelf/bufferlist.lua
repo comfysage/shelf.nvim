@@ -169,11 +169,6 @@ function Bufferlist:add(index, name, buf)
     return
   end
 
-  local restore_buffers = require('shelf.config').get().restore_buffers
-  if (not buf or buf < -1) and restore_buffers then
-    buf = utils.create_buf(name)
-  end
-
   table.insert(self.list, index, { buf or -1, name })
 end
 
