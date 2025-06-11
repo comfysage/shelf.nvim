@@ -17,11 +17,11 @@ if not vim.v.vim_did_enter then
   vim.api.nvim_create_autocmd('VimEnter', {
     group = group,
     callback = function(_)
-      require('shelf.data'):read()
+      require('shelf').init()
     end,
   })
 else
-  require('shelf.data'):read()
+  require('shelf').init()
 end
 vim.api.nvim_create_autocmd('VimLeavePre', {
   group = group,

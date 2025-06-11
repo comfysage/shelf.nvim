@@ -11,4 +11,9 @@ M.setup = function(cfg)
   config.validate()
 end
 
+M.init = function()
+  require('shelf.data'):read()
+  require('shelf.bufferlist').bufferlist:fix()
+end
+
 return M
