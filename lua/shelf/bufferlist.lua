@@ -96,7 +96,9 @@ function Bufferlist:fix()
     local fname = item[2]
 
     if bufnr < 0 then
-      bufnr = utils.create_buf(fname)
+      if require('shelf.config').get().restore_buffers then
+        bufnr = utils.create_buf(fname)
+      end
     else
       bufnr = vim.fn.bufnr(fname)
     end
