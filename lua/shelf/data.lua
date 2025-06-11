@@ -1,4 +1,4 @@
-local bufferlist = require('shelf.bufferlist')
+local bufferlist = require('shelf.bufferlist').bufferlist
 local config = require('shelf.config')
 
 ---@class shelf.types.data.value

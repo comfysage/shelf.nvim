@@ -187,6 +187,9 @@ function Bufferlist:open(index)
   vim.api.nvim_set_current_buf(nr)
 end
 
-_G.bufferlist = _G.bufferlist or Bufferlist:new()
+local M = {}
 
-return _G.bufferlist
+---@class shelf.types.bufferlist
+M.bufferlist = Bufferlist:new()
+
+return M

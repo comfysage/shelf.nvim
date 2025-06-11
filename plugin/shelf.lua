@@ -10,7 +10,6 @@ end
 
 vim.g.loaded_shelf = true
 
-require('shelf.bufferlist')
 
 local group = vim.api.nvim_create_augroup('shelf', { clear = true })
 

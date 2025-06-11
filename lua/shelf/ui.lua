@@ -14,7 +14,7 @@ if not has_yosu then
 end
 
 local model = require 'yosu.model'({
-  bufferlist = require 'shelf.bufferlist',
+  bufferlist = require 'shelf.bufferlist'.bufferlist,
   -- list as drawn lines
   lines = {},
   -- list as edited state
@@ -256,7 +256,7 @@ function model:update(msg)
     close = function()
       self:send 'apply_state'
 
-      _G.bufferlist = self.data.bufferlist
+      require('shelf.bufferlist').bufferlist = self.data.bufferlist
 
       vim.cmd.quit()
     end,
