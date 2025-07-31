@@ -13,6 +13,10 @@ end
 
 vim.g.loaded_shelf = true
 
+vim.keymap.set('n', '<Plug>(shelf-open)', function()
+  require('shelf.ui').open()
+end, { noremap = true, silent = true })
+
 local group = vim.api.nvim_create_augroup('shelf', { clear = true })
 
 if not vim.v.vim_did_enter then

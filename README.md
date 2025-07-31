@@ -40,12 +40,7 @@ shelf can be installed by adding _this_ to your `lua/plugins/init.lua`.
         require 'shelf'.setup(opts)
 
         -- toggle shelf ui
-        keymaps.normal['<leader>p'] = {
-            function()
-                require('shelf.ui').open()
-            end,
-            'show bufferlist',
-        }
+        vim.keymap.set('n', '<leader>p', '<Plug>(shelf-open)', { silent = true })
     end,
 }
 ```
