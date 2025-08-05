@@ -4,9 +4,10 @@ end
 
 local min_version = '0.10.0'
 if vim.fn.has('nvim-' .. min_version) ~= 1 then
-  vim.notify_once(
-    ('shelf.nvim requires Neovim >= %s'):format(min_version),
-    vim.log.levels.ERROR
+  vim.api.nvim_echo(
+    { { ('shelf.nvim requires Neovim >= %s'):format(min_version) } },
+    true,
+    { err = true }
   )
   return
 end
@@ -19,15 +20,15 @@ end, { silent = true })
 
 local group = vim.api.nvim_create_augroup('shelf', { clear = true })
 
-if not vim.v.vim_did_enter then
+if vim.v.vim_did_enter ~= 0 then
+  require('shelf').init()
+else
   vim.api.nvim_create_autocmd('VimEnter', {
     group = group,
     callback = function(_)
       require('shelf').init()
     end,
   })
-else
-  require('shelf').init()
 end
 vim.api.nvim_create_autocmd('VimLeavePre', {
   group = group,
