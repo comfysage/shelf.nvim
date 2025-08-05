@@ -15,7 +15,7 @@ vim.g.loaded_shelf = true
 
 vim.keymap.set('n', '<Plug>(shelf-open)', function()
   require('shelf.ui').open()
-end, { noremap = true, silent = true })
+end, { silent = true })
 
 local group = vim.api.nvim_create_augroup('shelf', { clear = true })
 
