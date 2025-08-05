@@ -30,6 +30,8 @@ local model = require 'yosu.model'({
 })
 
 function model:init()
+  api.nvim_buf_set_name(self.internal.buf, 'shelf://' .. self.internal.buf)
+
   self.data.bufferlist:update()
   self:send 'reset_state'
   self:on('ModeChanged', function(props)
@@ -37,6 +39,17 @@ function model:init()
       self:send 'text_changed'
     end
   end, {})
+  self:on("BufModifiedSet", function()
+    self:send 'text_changed'
+  end, {})
+  self:on("WinClosed", function()
+    self:send 'quit'
+  end, {})
+  self:on("BufWriteCmd", function()
+    self:send 'apply_state'
+  end, {})
+
+  vim.bo[self.internal.buf].buftype = 'acwrite'
 
   local cfg = config.get()
 
@@ -70,38 +83,6 @@ end
 local function get_current_index(props)
   local pos = api.nvim_win_get_cursor(props.internal.win)
   return pos[1]
-end
-
----@param props core.types.ui.model
----@return boolean
-local function has_changes(props)
-  local function get_second(array)
-    return array[2]
-  end
-  local current_list = vim
-    .iter(props.data.bufferlist.list)
-    :map(get_second)
-    :filter(not_empty)
-    :map(function(path)
-      local repl = string.gsub(path, vim.fn.getcwd() .. '/', '')
-      return repl
-    end)
-    :totable()
-  local next_list = vim.iter(props.data.lines):filter(not_empty):totable()
-  local current = vim.iter(current_list):join '\n'
-  local next = vim.iter(next_list):join '\n'
-
-  ---@diagnostic disable-next-line: missing-fields
-  local diff = vim.diff(current, next, {
-    result_type = 'indices',
-    ignore_whitespace = true,
-    ignore_whitespace_change = true,
-    ignore_whitespace_change_at_eol = true,
-    ignore_cr_at_eol = true,
-    ignore_blank_lines = true,
-  })
-
-  return #diff > 0
 end
 
 ---@param props core.types.ui.model
@@ -189,7 +170,7 @@ function model:update(msg)
       api.nvim_win_set_config(self.internal.win, self.internal.window.config)
     end,
     fix_modified_hl = function()
-      local is_changed = has_changes(self)
+      local is_changed = api.nvim_get_option_value('modified', { buf = self.internal.buf })
       if is_changed then
         vim.wo[self.internal.win].winhl = 'FloatBorder:DiagnosticFloatingWarn'
       else
@@ -200,7 +181,6 @@ function model:update(msg)
       self:send 'opts'
       self.data.bufferlist:update()
       self:send 'reset_state'
-      return true
     end,
     opts = function()
       api.nvim_set_option_value('number', true, { win = self.internal.win })
@@ -223,7 +203,7 @@ function model:update(msg)
         end
       end)
       self.data.bufferlist:update()
-      self:send 'fix_modified_hl'
+      self:send 'mark_unmodified'
     end,
     update_state = function()
       -- update state based on lines
@@ -240,11 +220,16 @@ function model:update(msg)
           return { -1, item }
         end)
         :totable()
+      self:send 'mark_unmodified'
     end,
     reset_state = function()
       -- reset edits
       self.data.state = self.data.bufferlist.list
       return true
+    end,
+    mark_unmodified = function()
+      vim.bo[self.internal.buf].modified = false
+      self:send 'fix_modified_hl'
     end,
     text_changed_insert = function()
       self:send 'text_changed'
@@ -277,6 +262,9 @@ function model:update(msg)
       require('shelf.bufferlist').bufferlist = self.data.bufferlist
 
       vim.cmd.quit()
+    end,
+    view = function()
+      self:send 'mark_unmodified'
     end,
   }
 
